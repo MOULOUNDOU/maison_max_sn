@@ -122,9 +122,15 @@
   };
 
   const renderCart = () => {
+    const itemCount = count();
     const countNodes = document.querySelectorAll("[data-cart-count]");
     countNodes.forEach((node) => {
-      node.textContent = String(count());
+      node.textContent = String(itemCount);
+    });
+
+    const summaryNodes = document.querySelectorAll("[data-cart-summary]");
+    summaryNodes.forEach((node) => {
+      node.textContent = `${itemCount} article${itemCount > 1 ? "s" : ""}`;
     });
 
     const totalNodes = document.querySelectorAll("[data-cart-total]");
@@ -139,11 +145,13 @@
 
     cartList.replaceChildren();
     if (!cart.length) {
+      cartList.hidden = true;
       empty && empty.removeAttribute("hidden");
       checkout && checkout.setAttribute("disabled", "disabled");
       return;
     }
 
+    cartList.hidden = false;
     empty && empty.setAttribute("hidden", "hidden");
     checkout && checkout.removeAttribute("disabled");
     cart.forEach((item) => cartList.appendChild(createCartItem(item)));

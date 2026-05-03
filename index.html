@@ -115,11 +115,14 @@
       <section class="hero-band">
         <div class="container hero-grid">
           <article class="hero-main">
-            <img
-              src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1500&q=82"
-              alt="Selection de mode Maison Max pour femmes et hommes au Senegal"
-              loading="eager"
-            />
+            <div class="hero-slider" aria-hidden="true">
+              <img class="hero-slide" src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1500&q=84" alt="" loading="eager" />
+              <img class="hero-slide" src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1500&q=84" alt="" loading="eager" />
+              <img class="hero-slide" src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1500&q=84" alt="" loading="eager" />
+            </div>
+            <div class="hero-dots" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
             <div class="hero-copy">
               <span>Collection Maison Max</span>
               <h1>Tenues chics pour le Senegal</h1>
@@ -348,6 +351,7 @@
         <div>
           <span>Maison Max</span>
           <h2>Votre panier</h2>
+          <p class="cart-summary" data-cart-summary>0 article</p>
         </div>
         <button class="icon-btn" type="button" data-cart-close aria-label="Fermer le panier"><i class="fa-solid fa-xmark"></i></button>
       </div>

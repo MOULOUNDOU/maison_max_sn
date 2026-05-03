@@ -69,6 +69,58 @@
     "accessoires"
   ];
 
+  const fallbackGalleryImages = [
+    "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=900&q=82",
+    "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=900&q=82",
+    "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=900&q=82",
+    "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=900&q=82"
+  ];
+
+  const categoryGalleryImages = {
+    robes: [
+      "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1612336307429-8a898d10e223?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=900&q=82"
+    ],
+    boubous: [
+      "https://images.unsplash.com/photo-1608755728617-aefab37d2edd?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=900&q=82"
+    ],
+    ensembles: [
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=900&q=82"
+    ],
+    chemises: [
+      "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?auto=format&fit=crop&w=900&q=82"
+    ],
+    chaussures: [
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=900&q=82"
+    ],
+    sacs: [
+      "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=900&q=82"
+    ],
+    accessoires: [
+      "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1586078130702-d208859b6223?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?auto=format&fit=crop&w=900&q=82"
+    ],
+    "vetements-enfants": [
+      "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1522771930-78848d9293e8?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?auto=format&fit=crop&w=900&q=82"
+    ]
+  };
+
+  let productCarouselTimer = null;
+
   const demoProducts = [
     {
       id: "demo-robe-elegante-wax",
@@ -466,6 +518,37 @@
     return price;
   };
 
+  const getProductGallery = (product) => {
+    const fallback = categoryGalleryImages[product.category] || fallbackGalleryImages;
+    const gallery = utils.unique([product.main_image, ...(product.images || []), ...fallback, ...fallbackGalleryImages]);
+    return gallery.slice(0, Math.max(3, Math.min(gallery.length, 5)));
+  };
+
+  const startProductCarousels = () => {
+    if (productCarouselTimer) clearInterval(productCarouselTimer);
+    const carousels = Array.from(document.querySelectorAll("[data-product-carousel]"));
+    if (!carousels.length) return;
+
+    const updateCarousel = (carousel, index) => {
+      const images = Array.from(carousel.querySelectorAll(".product-carousel-image"));
+      const dots = Array.from(carousel.querySelectorAll(".product-carousel-dots span"));
+      if (!images.length) return;
+      carousel.dataset.index = String(index);
+      images.forEach((image, imageIndex) => image.classList.toggle("is-active", imageIndex === index));
+      dots.forEach((dot, dotIndex) => dot.classList.toggle("is-active", dotIndex === index));
+    };
+
+    carousels.forEach((carousel) => updateCarousel(carousel, 0));
+    productCarouselTimer = setInterval(() => {
+      carousels.forEach((carousel) => {
+        const images = carousel.querySelectorAll(".product-carousel-image");
+        if (images.length < 2) return;
+        const next = (Number(carousel.dataset.index || 0) + 1) % images.length;
+        updateCarousel(carousel, next);
+      });
+    }, 4000);
+  };
+
   const createProductCard = (product) => {
     const card = utils.createEl("article", { className: "product-card" });
 
@@ -473,15 +556,29 @@
       className: "product-media",
       attrs: { href: utils.getProductUrl(product), "aria-label": `Voir ${product.name}` }
     });
-    media.appendChild(
-      utils.createEl("img", {
-        attrs: {
-          src: product.main_image || utils.fallbackImage,
-          alt: product.name,
-          loading: "lazy"
-        }
-      })
-    );
+    const productCarousel = utils.createEl("div", {
+      className: "product-image-carousel",
+      attrs: { "data-product-carousel": "", "data-index": "0" }
+    });
+    const gallery = getProductGallery(product);
+    gallery.forEach((src, index) => {
+      productCarousel.appendChild(
+        utils.createEl("img", {
+          className: `product-carousel-image ${index === 0 ? "is-active" : ""}`,
+          attrs: {
+            src,
+            alt: product.name,
+            loading: "lazy"
+          }
+        })
+      );
+    });
+    const carouselDots = utils.createEl("div", { className: "product-carousel-dots" });
+    gallery.forEach((_, index) => {
+      carouselDots.appendChild(utils.createEl("span", { className: index === 0 ? "is-active" : "" }));
+    });
+    productCarousel.appendChild(carouselDots);
+    media.appendChild(productCarousel);
 
     const badges = utils.createEl("div", { className: "badge-stack" });
     if (product.is_promo) badges.appendChild(createBadge("Promo", "promo"));
@@ -612,6 +709,7 @@
     const start = (state.page - 1) * pageSize;
     const products = state.visibleProducts.slice(start, start + pageSize);
     products.forEach((product) => grid.appendChild(createProductCard(product)));
+    startProductCarousels();
     renderPagination(totalPages);
     renderProductStructuredData(state.visibleProducts.slice(0, 10));
   };
@@ -754,7 +852,7 @@
     gallery.appendChild(main);
 
     const thumbs = utils.createEl("div", { className: "modal-thumbs" });
-    const galleryImages = utils.unique([product.main_image, ...(product.images || [])]);
+    const galleryImages = getProductGallery(product);
     galleryImages.forEach((src) => {
       const button = utils.createEl("button", { attrs: { type: "button" } });
       button.appendChild(utils.createEl("img", { attrs: { src, alt: product.name, loading: "lazy" } }));
