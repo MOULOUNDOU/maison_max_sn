@@ -968,7 +968,16 @@
     if (!toggle || !menu) return;
     toggle.addEventListener("click", () => {
       const opened = menu.classList.toggle("is-open");
+      toggle.classList.toggle("is-active", opened);
       toggle.setAttribute("aria-expanded", String(opened));
+    });
+
+    menu.querySelectorAll("a, button").forEach((item) => {
+      item.addEventListener("click", () => {
+        menu.classList.remove("is-open");
+        toggle.classList.remove("is-active");
+        toggle.setAttribute("aria-expanded", "false");
+      });
     });
   };
 
