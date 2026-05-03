@@ -25,11 +25,13 @@ html {
 }
 
 body {
+  width: 100%;
   margin: 0;
   color: var(--text);
   background: var(--bg);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.5;
+  overflow-x: hidden;
 }
 
 body.cart-open,
@@ -52,6 +54,7 @@ input,
 select,
 textarea {
   font: inherit;
+  max-width: 100%;
 }
 
 button {
@@ -121,6 +124,10 @@ button:disabled {
   grid-template-columns: auto minmax(420px, 1fr) auto;
   align-items: center;
   gap: 22px;
+}
+
+.main-header-inner > * {
+  min-width: 0;
 }
 
 .brand {
@@ -196,6 +203,7 @@ button:disabled {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  justify-self: end;
   gap: 12px;
   border: 0;
   border-radius: var(--radius);
@@ -1351,6 +1359,7 @@ button:disabled {
   right: 0;
   width: min(430px, 100%);
   height: 100vh;
+  height: 100dvh;
   display: grid;
   grid-template-rows: auto 1fr auto;
   background: var(--white);
@@ -1995,7 +2004,7 @@ button:disabled {
   }
 
   .main-header-inner {
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: 42px minmax(0, 1fr) 48px;
     gap: 12px;
     padding: 10px 0;
   }
@@ -2003,6 +2012,14 @@ button:disabled {
   .menu-toggle {
     display: inline-grid;
     place-items: center;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .main-header-inner > .brand {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
   }
 
   .brand img {
@@ -2010,11 +2027,21 @@ button:disabled {
     height: 54px;
   }
 
+  .main-header-inner > .cart-button {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+  }
+
   .header-search {
     grid-column: 1 / -1;
     grid-row: 2;
     width: 100%;
-    grid-template-columns: 124px 1fr 44px;
+    grid-template-columns: minmax(104px, 128px) minmax(0, 1fr) 44px;
+  }
+
+  .product-page-search {
+    grid-template-columns: none;
   }
 
   .cart-button {
@@ -2135,13 +2162,28 @@ button:disabled {
 }
 
 @media (max-width: 560px) {
+  .container {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
   .hero-band {
     padding-top: 14px;
   }
 
+  .hero-main {
+    min-height: 380px;
+  }
+
+  .hero-copy {
+    left: 18px;
+    bottom: 20px;
+    width: calc(100% - 36px);
+  }
+
   .hero-copy h1 {
-    max-width: 11ch;
-    font-size: 38px;
+    max-width: 10ch;
+    font-size: 36px;
   }
 
   .hero-copy p {
@@ -2150,6 +2192,10 @@ button:disabled {
 
   .hero-actions {
     display: grid;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
   }
 
   .promo-stack {
@@ -2180,7 +2226,7 @@ button:disabled {
 
   .hot-deal-content h3 {
     max-width: 100%;
-    font-size: 34px;
+    font-size: 30px;
   }
 
   .hot-deal-content p {
@@ -2232,11 +2278,118 @@ button:disabled {
     padding: 24px 18px;
   }
 
+  .modal-product-detail h2,
+  .product-page-info h1 {
+    font-size: 28px;
+  }
+
+  .product-page-shell {
+    padding: 14px;
+  }
+
   .form-grid.two {
     grid-template-columns: 1fr;
   }
 
   .admin-images-preview {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 420px) {
+  .topbar {
+    font-size: 12px;
+  }
+
+  .topbar-inner {
+    min-height: 30px;
+  }
+
+  .main-header-inner {
+    grid-template-columns: 42px minmax(0, 1fr) 48px;
+    gap: 8px;
+  }
+
+  .brand img {
+    width: 76px;
+    height: 48px;
+  }
+
+  .header-search {
+    grid-template-columns: minmax(0, 1fr) 44px;
+  }
+
+  .header-search select {
+    grid-column: 1 / -1;
+    min-height: 38px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-search input {
+    min-height: 44px;
+    padding: 0 12px;
+  }
+
+  .hero-main {
+    min-height: 350px;
+  }
+
+  .hero-copy h1 {
+    font-size: 32px;
+  }
+
+  .section-heading h2,
+  .newsletter-inner h2 {
+    font-size: 26px;
+  }
+
+  .category-circle img {
+    width: min(112px, 34vw);
+  }
+
+  .deal-timer {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .deal-timer span {
+    min-height: 50px;
+    padding: 6px 4px;
+  }
+
+  .cart-drawer {
+    width: 100%;
+  }
+
+  .cart-header,
+  .cart-list,
+  .cart-footer {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .cart-item-controls {
+    grid-column: 1 / -1;
+  }
+
+  .floating-whatsapp {
+    right: 14px;
+    bottom: 14px;
+    width: 52px;
+    height: 52px;
+    font-size: 24px;
+  }
+
+  .admin-header-actions,
+  .admin-header-actions .btn,
+  .admin-row-actions,
+  .admin-row-actions .btn {
+    width: 100%;
+  }
+
+  .admin-row-actions {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 }
