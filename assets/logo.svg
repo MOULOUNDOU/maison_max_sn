@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="96" viewBox="0 0 340 96" role="img" aria-labelledby="title desc">
+  <title id="title">Maison Max</title>
+  <desc id="desc">Logo Maison Max dore</desc>
+  <defs>
+    <linearGradient id="gold" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffe39b"/>
+      <stop offset="0.44" stop-color="#d7a63a"/>
+      <stop offset="1" stop-color="#9d6f16"/>
+    </linearGradient>
+  </defs>
+  <rect width="340" height="96" rx="16" fill="#123f83"/>
+  <path d="M40 69V29h8l18 22 18-22h8v40h-9V44L68 62h-4L49 44v25h-9Z" fill="url(#gold)"/>
+  <path d="M112 68h-9l17-39h8l17 39h-10l-3-8h-17l-3 8Zm6-16h11l-5-13-6 13Z" fill="url(#gold)"/>
+  <path d="M152 29h9v39h-9V29Zm20 39V29h8l18 23 18-23h8v39h-9V44l-15 18h-4l-15-18v24h-9Z" fill="url(#gold)"/>
+  <text x="236" y="45" fill="#fff7df" font-size="19" font-family="Georgia, serif" font-weight="700" letter-spacing="3">MAISON</text>
+  <text x="236" y="68" fill="url(#gold)" font-size="25" font-family="Georgia, serif" font-weight="700" letter-spacing="3">MAX</text>
+</svg>

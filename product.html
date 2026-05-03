@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Produit Maison Max | Vetements au Senegal</title>
+    <meta
+      name="description"
+      content="Detail produit Maison Max : prix en FCFA, tailles, couleurs et commande directe sur WhatsApp."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="Produit Maison Max" />
+    <meta property="og:description" content="Vetements Maison Max au Senegal, commande sur WhatsApp." />
+    <meta property="og:type" content="product" />
+    <meta property="og:image" content="https://maisonmax.sn/assets/logo-maison-max.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="assets/logo-maison-max.jpg" type="image/jpeg" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="topbar">
+        <div class="container topbar-inner">
+          <p>Maison Max Senegal : commandez vos articles favoris directement sur WhatsApp.</p>
+          <div class="topbar-links">
+            <a href="tel:+221771234567"><i class="fa-solid fa-phone"></i> +221 77 123 45 67</a>
+            <a href="index.html#livraison"><i class="fa-solid fa-location-dot"></i> Livraison Senegal</a>
+          </div>
+        </div>
+      </div>
+      <div class="main-header">
+        <div class="container main-header-inner">
+          <a class="brand" href="index.html" aria-label="Maison Max accueil">
+            <img src="assets/logo-maison-max.jpg" alt="Maison Max" width="96" height="58" />
+          </a>
+          <div class="header-search product-page-search">
+            <a class="btn btn-primary" href="index.html#catalogue"><i class="fa-solid fa-store"></i><span>Retour boutique</span></a>
+          </div>
+          <button class="cart-button" type="button" data-cart-open aria-label="Ouvrir le panier">
+            <span class="cart-icon"><i class="fa-solid fa-bag-shopping"></i><strong data-cart-count>0</strong></span>
+            <span>
+              <small>Mon panier</small>
+              <b data-cart-total>0 FCFA</b>
+            </span>
+          </button>
+        </div>
+      </div>
+      <nav class="nav-bar">
+        <div class="container nav-inner">
+          <a href="index.html#catalogue">Boutique</a>
+          <a href="index.html#hot-deal">Promotions</a>
+          <a href="index.html#femme">Categories</a>
+          <a href="index.html#contact">Contact</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="product-page-main">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Fil d'Ariane">
+          <a href="index.html">Accueil</a>
+          <i class="fa-solid fa-chevron-right"></i>
+          <span>Produit</span>
+        </nav>
+
+        <div class="product-page-loading" data-product-page-loading>
+          <div class="skeleton-card wide"></div>
+        </div>
+
+        <div class="empty-state" data-product-page-empty hidden>
+          <i class="fa-regular fa-face-frown"></i>
+          <h1>Produit introuvable</h1>
+          <p>Ce produit n'est plus disponible ou le lien est incorrect.</p>
+          <a class="btn btn-primary" href="index.html#catalogue"><i class="fa-solid fa-store"></i><span>Voir la boutique</span></a>
+        </div>
+
+        <section class="product-page-shell" data-product-page></section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <img src="assets/logo-maison-max.jpg" alt="Maison Max" width="120" height="90" loading="lazy" />
+          <p>Vetements, chaussures et accessoires au Senegal avec commande par WhatsApp.</p>
+        </div>
+        <div>
+          <h2>Boutique</h2>
+          <a href="index.html#catalogue">Produits</a>
+          <a href="index.html#hot-deal">Promotions</a>
+          <a href="admin.html">Espace vendeur</a>
+        </div>
+        <div>
+          <h2>Contact</h2>
+          <a href="https://wa.me/221771234567" data-whatsapp-floating>WhatsApp</a>
+          <a href="tel:+221771234567">+221 77 123 45 67</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="container">
+          <p>© 2026 Maison Max.</p>
+          <p>Commande par WhatsApp, aucun paiement en ligne.</p>
+        </div>
+      </div>
+    </footer>
+
+    <a class="floating-whatsapp" href="https://wa.me/221771234567" data-whatsapp-floating aria-label="Contacter Maison Max sur WhatsApp">
+      <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <div class="cart-overlay" data-cart-overlay></div>
+    <aside class="cart-drawer" data-cart-drawer aria-hidden="true" aria-label="Panier">
+      <div class="cart-header">
+        <div>
+          <span>Maison Max</span>
+          <h2>Votre panier</h2>
+        </div>
+        <button class="icon-btn" type="button" data-cart-close aria-label="Fermer le panier"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="cart-empty" data-cart-empty>
+        <i class="fa-solid fa-bag-shopping"></i>
+        <p>Votre panier est vide.</p>
+      </div>
+      <div class="cart-list" data-cart-list></div>
+      <div class="cart-footer">
+        <label class="field-label">
+          <span>Ville de livraison</span>
+          <select data-delivery-city>
+            <option value="">A preciser</option>
+            <option>Dakar</option>
+            <option>Pikine</option>
+            <option>Guédiawaye</option>
+            <option>Rufisque</option>
+            <option>Thiès</option>
+            <option>Mbour</option>
+            <option>Saint-Louis</option>
+            <option>Touba</option>
+            <option>Kaolack</option>
+            <option>Ziguinchor</option>
+          </select>
+        </label>
+        <div class="cart-total-line">
+          <span>Total</span>
+          <strong data-cart-total>0 FCFA</strong>
+        </div>
+        <button class="btn btn-primary btn-full" type="button" data-whatsapp-checkout>
+          <i class="fa-brands fa-whatsapp"></i><span>Commander sur WhatsApp</span>
+        </button>
+        <button class="text-btn center" type="button" data-clear-cart>Vider le panier</button>
+      </div>
+    </aside>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

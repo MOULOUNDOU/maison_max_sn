@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Espace vendeur | Maison Max</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="assets/logo-maison-max.jpg" type="image/jpeg" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="admin-body">
+    <header class="admin-header">
+      <div class="container admin-header-inner">
+        <a class="brand" href="index.html" aria-label="Retour au site Maison Max">
+          <img src="assets/logo-maison-max.jpg" alt="Maison Max" width="96" height="58" />
+        </a>
+        <div class="admin-header-actions">
+          <a class="btn btn-light btn-sm" href="index.html"><i class="fa-solid fa-store"></i><span>Voir le site</span></a>
+          <button class="btn btn-outline btn-sm" type="button" data-admin-logout hidden><i class="fa-solid fa-right-from-bracket"></i><span>Deconnexion</span></button>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <section class="container admin-panel" data-admin-setup hidden>
+        <div class="admin-empty-setup">
+          <i class="fa-solid fa-database"></i>
+          <h1>Configuration Supabase requise</h1>
+          <p>Renseignez `SUPABASE_URL` et `SUPABASE_ANON_KEY` dans `js/config.js`, executez `database.sql`, puis creez un compte admin.</p>
+          <a class="btn btn-primary" href="README.md"><i class="fa-solid fa-book"></i><span>Lire le README</span></a>
+        </div>
+      </section>
+
+      <section class="container admin-login-panel" data-admin-login hidden>
+        <div class="login-card">
+          <img src="assets/logo-maison-max.jpg" alt="Maison Max" width="140" height="110" />
+          <h1>Connexion vendeur</h1>
+          <p>Acces reserve a l'administration des produits Maison Max.</p>
+          <form data-login-form>
+            <label class="field-label">
+              <span>Email</span>
+              <input type="email" name="email" autocomplete="email" required />
+            </label>
+            <label class="field-label">
+              <span>Mot de passe</span>
+              <input type="password" name="password" autocomplete="current-password" required />
+            </label>
+            <button class="btn btn-primary btn-full" type="submit">
+              <i class="fa-solid fa-lock"></i><span>Se connecter</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <section class="container admin-app" data-admin-app hidden>
+        <div class="admin-title-row">
+          <div>
+            <span>Espace vendeur</span>
+            <h1>Gestion des produits</h1>
+          </div>
+          <button class="btn btn-light" type="button" data-admin-refresh>
+            <i class="fa-solid fa-rotate"></i><span>Actualiser</span>
+          </button>
+        </div>
+
+        <div class="admin-grid">
+          <section class="admin-card">
+            <div class="admin-card-header">
+              <h2 data-form-title>Ajouter un produit</h2>
+              <button class="text-btn" type="button" data-cancel-edit hidden>Annuler</button>
+            </div>
+
+            <form class="admin-form" data-product-form>
+              <div class="form-grid two">
+                <label class="field-label">
+                  <span>Nom</span>
+                  <input id="product-name" type="text" name="name" required maxlength="140" />
+                </label>
+                <label class="field-label">
+                  <span>Slug</span>
+                  <input id="product-slug" type="text" name="slug" required maxlength="160" />
+                </label>
+              </div>
+
+              <label class="field-label">
+                <span>Description courte</span>
+                <input type="text" name="short_description" maxlength="220" />
+              </label>
+
+              <label class="field-label">
+                <span>Description longue</span>
+                <textarea name="description" rows="5"></textarea>
+              </label>
+
+              <div class="form-grid two">
+                <label class="field-label">
+                  <span>Prix</span>
+                  <input type="number" name="price" min="1" step="100" required />
+                </label>
+                <label class="field-label">
+                  <span>Ancien prix</span>
+                  <input type="number" name="old_price" min="1" step="100" />
+                </label>
+              </div>
+
+              <div class="form-grid two">
+                <label class="field-label">
+                  <span>Categorie</span>
+                  <select name="category" data-category-options required></select>
+                </label>
+                <label class="field-label">
+                  <span>Sous-categorie</span>
+                  <input type="text" name="subcategory" placeholder="Homme, Femme, Enfant..." />
+                </label>
+              </div>
+
+              <div class="form-grid two">
+                <label class="field-label">
+                  <span>Tailles disponibles</span>
+                  <input type="text" name="sizes" placeholder="S, M, L, XL" />
+                </label>
+                <label class="field-label">
+                  <span>Couleurs disponibles</span>
+                  <input type="text" name="colors" placeholder="Rouge, Blanc, Bleu" />
+                </label>
+              </div>
+
+              <label class="field-label">
+                <span>Images existantes</span>
+                <textarea name="existing_images" rows="3" placeholder="URLs separees par des virgules"></textarea>
+              </label>
+
+              <label class="field-label">
+                <span>Uploader des images</span>
+                <input id="product-images" type="file" name="images" accept="image/*" multiple />
+              </label>
+
+              <div class="admin-images-preview" data-images-preview></div>
+
+              <div class="checkbox-grid">
+                <label><input type="checkbox" name="is_available" checked /> Disponible</label>
+                <label><input type="checkbox" name="is_featured" /> Vedette</label>
+                <label><input type="checkbox" name="is_promo" /> Promotion</label>
+              </div>
+
+              <button class="btn btn-primary btn-full" type="submit">
+                <i class="fa-solid fa-floppy-disk"></i><span>Enregistrer le produit</span>
+              </button>
+            </form>
+          </section>
+
+          <section class="admin-card product-admin-card">
+            <div class="admin-card-header">
+              <h2>Liste des produits</h2>
+            </div>
+
+            <div class="admin-filters">
+              <label class="field-label">
+                <span>Recherche</span>
+                <input type="search" data-admin-search placeholder="Nom, slug, categorie..." />
+              </label>
+              <label class="field-label">
+                <span>Categorie</span>
+                <select data-admin-category data-category-options="filter"></select>
+              </label>
+              <label class="field-label">
+                <span>Statut</span>
+                <select data-admin-status>
+                  <option value="all">Tous</option>
+                  <option value="available">Disponibles</option>
+                  <option value="unavailable">Rupture</option>
+                  <option value="featured">Vedettes</option>
+                  <option value="promo">Promotions</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="admin-product-list" data-admin-product-list></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/admin.js"></script>
+  </body>
+</html>
