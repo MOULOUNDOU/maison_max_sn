@@ -119,7 +119,7 @@
     ]
   };
 
-  let productCarouselTimer = null;
+  let productCarouselTimers = [];
 
   const demoProducts = [
     {
@@ -453,8 +453,8 @@
   };
 
   const getProductsPageSize = () => {
-    if (window.matchMedia && window.matchMedia("(max-width: 820px)").matches) return 8;
-    return 12;
+    if (window.matchMedia && window.matchMedia("(max-width: 820px)").matches) return 6;
+    return 8;
   };
 
   const getPageWindow = (current, total) => {
@@ -525,7 +525,8 @@
   };
 
   const startProductCarousels = () => {
-    if (productCarouselTimer) clearInterval(productCarouselTimer);
+    productCarouselTimers.forEach((t) => clearTimeout(t));
+    productCarouselTimers = [];
     const carousels = Array.from(document.querySelectorAll("[data-product-carousel]"));
     if (!carousels.length) return;
 
@@ -538,15 +539,22 @@
       dots.forEach((dot, dotIndex) => dot.classList.toggle("is-active", dotIndex === index));
     };
 
-    carousels.forEach((carousel) => updateCarousel(carousel, 0));
-    productCarouselTimer = setInterval(() => {
-      carousels.forEach((carousel) => {
-        const images = carousel.querySelectorAll(".product-carousel-image");
-        if (images.length < 2) return;
+    const scheduleCarousel = (carousel, i) => {
+      const images = carousel.querySelectorAll(".product-carousel-image");
+      if (images.length < 2) return;
+      const delay = 5000 + Math.random() * 4000;
+      const timerId = setTimeout(() => {
         const next = (Number(carousel.dataset.index || 0) + 1) % images.length;
         updateCarousel(carousel, next);
-      });
-    }, 4000);
+        scheduleCarousel(carousel, i);
+      }, delay);
+      productCarouselTimers[i] = timerId;
+    };
+
+    carousels.forEach((carousel, i) => {
+      updateCarousel(carousel, 0);
+      scheduleCarousel(carousel, i);
+    });
   };
 
   const createProductCard = (product) => {
@@ -578,6 +586,50 @@
       carouselDots.appendChild(utils.createEl("span", { className: index === 0 ? "is-active" : "" }));
     });
     productCarousel.appendChild(carouselDots);
+    if (gallery.length > 1) {
+      const prevBtn = utils.createEl("button", {
+        className: "carousel-arrow carousel-arrow-prev",
+        attrs: { type: "button", "aria-label": "Image precedente" }
+      });
+      prevBtn.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
+      const nextBtn = utils.createEl("button", {
+        className: "carousel-arrow carousel-arrow-next",
+        attrs: { type: "button", "aria-label": "Image suivante" }
+      });
+      nextBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+      const navigate = (dir, e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const imgs = productCarousel.querySelectorAll(".product-carousel-image");
+        const dots = productCarousel.querySelectorAll(".product-carousel-dots span");
+        const cur = Number(productCarousel.dataset.index || 0);
+        const next = (cur + dir + imgs.length) % imgs.length;
+        productCarousel.dataset.index = String(next);
+        imgs.forEach((img, i) => img.classList.toggle("is-active", i === next));
+        dots.forEach((dot, i) => dot.classList.toggle("is-active", i === next));
+        const idx = Array.from(document.querySelectorAll("[data-product-carousel]")).indexOf(productCarousel);
+        if (idx !== -1 && productCarouselTimers[idx]) {
+          clearTimeout(productCarouselTimers[idx]);
+          const reschedule = document.querySelectorAll("[data-product-carousel]")[idx];
+          if (reschedule) {
+            const delay = 5000 + Math.random() * 4000;
+            productCarouselTimers[idx] = setTimeout(function tick() {
+              const images = reschedule.querySelectorAll(".product-carousel-image");
+              const d = reschedule.querySelectorAll(".product-carousel-dots span");
+              const n = (Number(reschedule.dataset.index || 0) + 1) % images.length;
+              reschedule.dataset.index = String(n);
+              images.forEach((img, i) => img.classList.toggle("is-active", i === n));
+              d.forEach((dot, i) => dot.classList.toggle("is-active", i === n));
+              productCarouselTimers[idx] = setTimeout(tick, 5000 + Math.random() * 4000);
+            }, delay);
+          }
+        }
+      };
+      prevBtn.addEventListener("click", (e) => navigate(-1, e));
+      nextBtn.addEventListener("click", (e) => navigate(1, e));
+      productCarousel.appendChild(prevBtn);
+      productCarousel.appendChild(nextBtn);
+    }
     media.appendChild(productCarousel);
 
     const badges = utils.createEl("div", { className: "badge-stack" });
@@ -756,6 +808,17 @@
       if (holder) holder.appendChild(createCategoryButton(category, "category-circle"));
       if (menuHolder) menuHolder.appendChild(createCategoryButton(category, "menu-category-card"));
     });
+
+    if (holder) {
+      const track = utils.createEl("div", { className: "category-circles-track" });
+      while (holder.firstChild) track.appendChild(holder.firstChild);
+      categories.forEach((category) => {
+        const dup = createCategoryButton(category, "category-circle");
+        dup.classList.add("category-circle-dup");
+        track.appendChild(dup);
+      });
+      holder.appendChild(track);
+    }
   };
 
   const createMiniProduct = (product) => {
