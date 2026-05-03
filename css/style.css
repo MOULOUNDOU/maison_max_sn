@@ -164,6 +164,10 @@ button:disabled {
   transform: rotate(90deg);
 }
 
+.menu-close {
+  display: none;
+}
+
 .header-search {
   display: grid;
   grid-template-columns: 180px 1fr 48px;
@@ -1019,8 +1023,6 @@ button:disabled {
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--soft-shadow);
-  animation: riseFade 0.45s ease;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .hero-main,
@@ -1035,7 +1037,6 @@ button:disabled {
 }
 
 .product-card:hover {
-  transform: translateY(-4px);
   border-color: #bfd2ef;
   box-shadow: var(--shadow);
 }
@@ -1051,11 +1052,6 @@ button:disabled {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.25s ease;
-}
-
-.product-card:hover .product-media img {
-  transform: scale(1.04);
 }
 
 .badge-stack,
@@ -2193,6 +2189,21 @@ button:disabled {
     padding: 76px 14px 18px;
   }
 
+  .menu-close {
+    position: absolute;
+    top: 16px;
+    right: 14px;
+    display: inline-grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+    color: var(--white);
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 20px;
+  }
+
   .nav-inner a,
   .all-categories {
     width: 100%;
@@ -2392,6 +2403,18 @@ button:disabled {
 
   .social-links {
     justify-content: center;
+  }
+
+  .footer-brand .social-links a {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin: 0;
+    border-radius: 50%;
+    color: #2d2506;
+    background: var(--accent);
+    font-size: 18px;
   }
 
   .admin-header-inner,

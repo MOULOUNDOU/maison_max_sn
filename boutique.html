@@ -94,6 +94,9 @@
 
       <nav class="nav-bar" data-main-nav>
         <div class="container nav-inner">
+          <button class="menu-close" type="button" data-menu-close aria-label="Fermer le menu">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
           <button class="all-categories" type="button" data-category-shortcut data-category-shortcut-value="all">
             <i class="fa-solid fa-table-cells-large"></i>
             <span>Toutes les categories</span>
@@ -102,7 +105,6 @@
           <a href="index.html#accueil">Accueil</a>
           <a href="boutique.html">Boutique</a>
           <a href="boutique.html#catalogue">Nouveautes</a>
-          <a href="index.html#hot-deal">Hot Deal</a>
           <a href="index.html#livraison">Livraison</a>
           <a href="index.html#contact">Contact</a>
         </div>
@@ -124,7 +126,6 @@
               <p>Robes, boubous, ensembles, chemises, chaussures et accessoires, commandes par WhatsApp en quelques clics.</p>
               <div class="hero-actions">
                 <a class="btn btn-primary" href="#catalogue"><i class="fa-solid fa-bag-shopping"></i><span>Voir la boutique</span></a>
-                <a class="btn btn-ghost" href="#hot-deal"><i class="fa-solid fa-tag"></i><span>Offres du moment</span></a>
               </div>
             </div>
           </article>
@@ -282,37 +283,6 @@
             <nav class="products-pagination" data-products-pagination aria-label="Pagination des produits"></nav>
           </section>
 
-          <section class="deal-row" id="hot-deal" aria-labelledby="hot-deal-title">
-            <div class="hot-deal-block">
-              <div class="section-heading compact">
-                <div>
-                  <span>Offre limitee</span>
-                  <h2 id="hot-deal-title">Hot Deal</h2>
-                </div>
-                <div class="deal-timer" role="group" aria-label="Compte a rebours visuel">
-                  <span><strong>03</strong><small>Jours</small></span>
-                  <span><strong>12</strong><small>Heures</small></span>
-                  <span><strong>54</strong><small>Min</small></span>
-                  <span><strong>52</strong><small>Sec</small></span>
-                </div>
-              </div>
-              <div class="hot-deal-card" data-hot-deal></div>
-            </div>
-
-            <article class="feature-deal-card">
-              <img
-                src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=900&q=80"
-                alt="Selection premium Maison Max pour femmes au Senegal"
-                loading="lazy"
-              />
-              <div>
-                <span>Selection premium</span>
-                <h2>Looks de ceremonie</h2>
-                <p>Boubous, robes et ensembles elegants pour vos evenements a Dakar et partout au Senegal.</p>
-                <a class="btn btn-primary" href="#catalogue"><i class="fa-solid fa-arrow-up-right-from-square"></i><span>Voir la selection</span></a>
-              </div>
-            </article>
-          </section>
         </div>
       </section>
 
@@ -344,7 +314,6 @@
         <div>
           <h2>Boutique</h2>
           <a href="#catalogue">Nouveautes</a>
-          <a href="index.html#hot-deal">Promotions</a>
           <a href="#catalogue">Catalogue</a>
           <a href="index.html#livraison">Livraison</a>
         </div>
