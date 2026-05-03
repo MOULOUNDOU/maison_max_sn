@@ -158,6 +158,8 @@
   };
 
   const openCart = () => {
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.documentElement.style.setProperty("--scrollbar-width", scrollbarWidth + "px");
     document.body.classList.add("cart-open");
     const drawer = document.querySelector("[data-cart-drawer]");
     drawer && drawer.setAttribute("aria-hidden", "false");
@@ -165,6 +167,7 @@
 
   const closeCart = () => {
     document.body.classList.remove("cart-open");
+    document.documentElement.style.setProperty("--scrollbar-width", "0px");
     const drawer = document.querySelector("[data-cart-drawer]");
     drawer && drawer.setAttribute("aria-hidden", "true");
   };
