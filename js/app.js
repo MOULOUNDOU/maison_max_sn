@@ -358,6 +358,7 @@
     minPrice: "",
     maxPrice: "",
     sort: "category",
+    page: 1,
     loading: true,
     error: ""
   };
@@ -399,7 +400,18 @@
     node.hidden = !message;
   };
 
-  const filterProducts = () => {
+  const getProductsPageSize = () => {
+    if (window.matchMedia && window.matchMedia("(max-width: 820px)").matches) return 8;
+    return 12;
+  };
+
+  const getPageWindow = (current, total) => {
+    if (total <= 5) return Array.from({ length: total }, (_, index) => index + 1);
+    const pages = new Set([1, total, current, current - 1, current + 1]);
+    return [...pages].filter((page) => page >= 1 && page <= total).sort((a, b) => a - b);
+  };
+
+  const filterProducts = ({ resetPage = true } = {}) => {
     const search = state.search.trim().toLowerCase();
     const min = Number(state.minPrice || 0);
     const max = Number(state.maxPrice || 0);
@@ -438,6 +450,7 @@
     }
 
     state.visibleProducts = products;
+    if (resetPage) state.page = 1;
     renderProductGrid();
   };
 
@@ -515,6 +528,65 @@
     return card;
   };
 
+  const setProductPage = (page) => {
+    state.page = Math.max(1, Number(page) || 1);
+    renderProductGrid();
+    document.querySelector("#catalogue")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const renderPagination = (totalPages) => {
+    const holder = document.querySelector("[data-products-pagination]");
+    if (!holder) return;
+    holder.replaceChildren();
+
+    if (state.loading || totalPages <= 1) {
+      holder.hidden = true;
+      return;
+    }
+
+    holder.hidden = false;
+
+    const makeButton = (label, page, options = {}) => {
+      const button = utils.createEl("button", {
+        className: `pagination-btn ${options.current ? "is-current" : ""}`,
+        attrs: {
+          type: "button",
+          disabled: options.disabled ? "disabled" : null,
+          "aria-label": options.ariaLabel || `Page ${page}`,
+          "aria-current": options.current ? "page" : null
+        }
+      });
+      button.innerHTML = label;
+      if (!options.disabled && !options.current) button.addEventListener("click", () => setProductPage(page));
+      return button;
+    };
+
+    holder.appendChild(
+      makeButton('<i class="fa-solid fa-chevron-left"></i>', state.page - 1, {
+        disabled: state.page === 1,
+        ariaLabel: "Page precedente"
+      })
+    );
+
+    const pages = utils.createEl("div", { className: "pagination-pages" });
+    let previous = 0;
+    getPageWindow(state.page, totalPages).forEach((page) => {
+      if (previous && page - previous > 1) {
+        pages.appendChild(utils.createEl("span", { className: "pagination-gap", text: "..." }));
+      }
+      pages.appendChild(makeButton(String(page), page, { current: page === state.page }));
+      previous = page;
+    });
+    holder.appendChild(pages);
+
+    holder.appendChild(
+      makeButton('<i class="fa-solid fa-chevron-right"></i>', state.page + 1, {
+        disabled: state.page === totalPages,
+        ariaLabel: "Page suivante"
+      })
+    );
+  };
+
   const renderProductGrid = () => {
     const grid = document.querySelector("[data-products-grid]");
     const empty = document.querySelector("[data-products-empty]");
@@ -522,15 +594,25 @@
 
     grid.replaceChildren();
 
-    if (state.loading) return;
+    if (state.loading) {
+      renderPagination(0);
+      return;
+    }
 
     if (!state.visibleProducts.length) {
       empty && empty.removeAttribute("hidden");
+      renderPagination(0);
       return;
     }
 
     empty && empty.setAttribute("hidden", "hidden");
-    state.visibleProducts.forEach((product) => grid.appendChild(createProductCard(product)));
+    const pageSize = getProductsPageSize();
+    const totalPages = Math.max(1, Math.ceil(state.visibleProducts.length / pageSize));
+    state.page = Math.min(Math.max(1, state.page), totalPages);
+    const start = (state.page - 1) * pageSize;
+    const products = state.visibleProducts.slice(start, start + pageSize);
+    products.forEach((product) => grid.appendChild(createProductCard(product)));
+    renderPagination(totalPages);
     renderProductStructuredData(state.visibleProducts.slice(0, 10));
   };
 
@@ -960,24 +1042,37 @@
         document.querySelector("#catalogue")?.scrollIntoView({ behavior: "smooth" });
       });
     });
+
+    window.addEventListener("resize", utils.debounce(() => {
+      renderProductGrid();
+    }, 180));
   };
 
   const bindMobileMenu = () => {
     const toggle = document.querySelector("[data-menu-toggle]");
     const menu = document.querySelector("[data-main-nav]");
     if (!toggle || !menu) return;
+
+    const closeMenu = () => {
+      menu.classList.remove("is-open");
+      toggle.classList.remove("is-active");
+      toggle.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("mobile-menu-open");
+    };
+
     toggle.addEventListener("click", () => {
       const opened = menu.classList.toggle("is-open");
       toggle.classList.toggle("is-active", opened);
       toggle.setAttribute("aria-expanded", String(opened));
+      document.body.classList.toggle("mobile-menu-open", opened);
     });
 
     menu.querySelectorAll("a, button").forEach((item) => {
-      item.addEventListener("click", () => {
-        menu.classList.remove("is-open");
-        toggle.classList.remove("is-active");
-        toggle.setAttribute("aria-expanded", "false");
-      });
+      item.addEventListener("click", closeMenu);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeMenu();
     });
   };
 
