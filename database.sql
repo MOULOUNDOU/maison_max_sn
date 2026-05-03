@@ -195,7 +195,7 @@ using (bucket_id = 'product-images' and public.is_admin(auth.uid()));
 insert into public.site_settings (key, value)
 values
   ('store_name', '"Maison Max"'::jsonb),
-  ('whatsapp_number', '"221771234567"'::jsonb),
+  ('whatsapp_number', '"221774957211"'::jsonb),
   ('delivery_zones', '["Dakar","Pikine","Guédiawaye","Rufisque","Thiès","Mbour","Saint-Louis","Touba","Kaolack","Ziguinchor"]'::jsonb)
 on conflict (key) do update set value = excluded.value;
 

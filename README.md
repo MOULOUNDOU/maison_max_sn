@@ -111,15 +111,16 @@ Ensuite ouvrez :
 Dans `js/config.js`, modifiez :
 
 ```js
-WHATSAPP_NUMBER: "221771234567"
+WHATSAPP_NUMBER: "221774957211"
 ```
 
 Format recommande : indicatif pays + numero, sans `+`, sans espace.
 
-Exemple :
+Autres numeros Maison Max :
 
 ```js
-WHATSAPP_NUMBER: "221770001122"
+SECONDARY_PHONE: "221777036107"
+THIRD_PHONE: "221768298420"
 ```
 
 Le panier generera un message comme :
