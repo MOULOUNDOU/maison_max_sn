@@ -8,6 +8,11 @@
   status = 200
 
 [[redirects]]
+  from = "/boutique"
+  to = "/boutique.html"
+  status = 200
+
+[[redirects]]
   from = "/produit/:slug"
   to = "/product.html?slug=:slug"
   status = 200

@@ -618,12 +618,14 @@
 
   const renderCategories = () => {
     const holder = document.querySelector("[data-category-circles]");
-    if (!holder) return;
-    holder.replaceChildren();
+    const menuHolder = document.querySelector("[data-menu-categories]");
 
-    categories.forEach((category) => {
+    if (holder) holder.replaceChildren();
+    if (menuHolder) menuHolder.replaceChildren();
+
+    const createCategoryButton = (category, className) => {
       const button = utils.createEl("button", {
-        className: "category-circle",
+        className,
         attrs: { type: "button" }
       });
       button.appendChild(
@@ -641,9 +643,20 @@
         const categoryFilter = document.querySelector("[data-category-filter]");
         if (categoryFilter) categoryFilter.value = category.key;
         filterProducts();
-        document.querySelector("#catalogue")?.scrollIntoView({ behavior: "smooth" });
+
+        const target = document.querySelector("#catalogue");
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth" });
+        } else {
+          window.location.href = `boutique.html?category=${encodeURIComponent(category.key)}`;
+        }
       });
-      holder.appendChild(button);
+      return button;
+    };
+
+    categories.forEach((category) => {
+      if (holder) holder.appendChild(createCategoryButton(category, "category-circle"));
+      if (menuHolder) menuHolder.appendChild(createCategoryButton(category, "menu-category-card"));
     });
   };
 
@@ -1067,8 +1080,8 @@
       document.body.classList.toggle("mobile-menu-open", opened);
     });
 
-    menu.querySelectorAll("a, button").forEach((item) => {
-      item.addEventListener("click", closeMenu);
+    menu.addEventListener("click", (event) => {
+      if (event.target.closest("a, button")) closeMenu();
     });
 
     document.addEventListener("keydown", (event) => {
@@ -1120,6 +1133,15 @@
     syncCategoryOptions();
     renderCategories();
     bindFilters();
+
+    const requestedCategory = utils.getQueryParam("category");
+    if (requestedCategory) {
+      state.selectedCategory = requestedCategory;
+      document.querySelectorAll("[data-category-filter], [data-hero-category]").forEach((select) => {
+        select.value = requestedCategory;
+      });
+    }
+
     loadProducts();
   };
 

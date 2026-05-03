@@ -305,6 +305,10 @@ button:disabled {
   background: #ffd049;
 }
 
+.menu-category-grid {
+  display: none;
+}
+
 .hero-band {
   padding: 22px 0 14px;
 }
@@ -579,6 +583,17 @@ button:disabled {
   gap: 18px;
   align-items: start;
   padding: 14px 0 24px;
+}
+
+.boutique-page .hero-band,
+.boutique-page .services-strip,
+.boutique-page .category-section,
+.boutique-page .newsletter-band {
+  display: none;
+}
+
+.boutique-page .commerce-layout {
+  padding-top: 26px;
 }
 
 .shop-sidebar {
@@ -2150,7 +2165,7 @@ button:disabled {
   .nav-bar {
     position: fixed;
     top: 0;
-    right: 0;
+    left: 0;
     z-index: 75;
     display: block;
     width: min(320px, 82vw);
@@ -2160,8 +2175,8 @@ button:disabled {
     opacity: 0;
     pointer-events: none;
     background: #113f83;
-    box-shadow: -18px 0 42px rgba(8, 20, 38, 0.28);
-    transform: translateX(105%);
+    box-shadow: 18px 0 42px rgba(8, 20, 38, 0.28);
+    transform: translateX(-105%);
     transition: opacity 0.24s ease, transform 0.3s ease;
   }
 
@@ -2188,6 +2203,36 @@ button:disabled {
   .nav-bar.is-open .nav-inner a,
   .nav-bar.is-open .all-categories {
     animation: mobileMenuItem 0.26s ease both;
+  }
+
+  .menu-category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    padding: 4px 0 10px;
+  }
+
+  .menu-category-card {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    min-height: 54px;
+    padding: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    color: var(--white);
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 12px;
+    font-weight: 800;
+    text-align: left;
+  }
+
+  .menu-category-card img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
   }
 
   .hero-main {
@@ -2289,6 +2334,10 @@ button:disabled {
   .newsletter-inner form,
   .admin-filters {
     grid-template-columns: 1fr;
+  }
+
+  .home-page .filters-panel {
+    display: none;
   }
 
   .products-grid {
