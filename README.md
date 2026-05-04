@@ -83,6 +83,18 @@ SUPABASE_ANON_KEY: "votre-cle-anon-publique",
 
 Si ces valeurs sont vides, le site affiche les produits de demonstration integres au code.
 
+Pour Netlify, ne publiez pas vos valeurs locales. Ajoutez plutot ces variables dans
+`Site configuration > Environment variables` :
+
+```txt
+SUPABASE_URL
+SUPABASE_ANON_KEY
+WHATSAPP_NUMBER
+```
+
+Au deploiement, Netlify execute `node scripts/generate-config.js` et genere
+automatiquement `js/config.js` avec ces variables.
+
 ## 6. Creer le premier compte admin
 
 1. Dans Supabase, allez dans `Authentication`.
@@ -150,8 +162,9 @@ Merci.
 
 1. Creez un site Netlify.
 2. Glissez-deposez le dossier du projet ou connectez le depot Git.
-3. Aucun build command n'est necessaire.
-4. Le dossier de publication est la racine du projet.
+3. Ajoutez les variables `SUPABASE_URL` et `SUPABASE_ANON_KEY` dans Netlify.
+4. Le build command est deja configure dans `netlify.toml`.
+5. Le dossier de publication est la racine du projet.
 
 ### Vercel
 
