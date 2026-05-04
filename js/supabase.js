@@ -79,7 +79,7 @@
     return true;
   };
 
-  const uploadProductImages = async (files, slug) => {
+  const uploadImages = async (files, folder) => {
     if (!files || !files.length) return [];
     const bucket = config.PRODUCT_IMAGE_BUCKET || "product-images";
     const urls = [];
@@ -87,7 +87,7 @@
     for (const file of files) {
       const ext = file.name.split(".").pop() || "jpg";
       const cleanName = `${Date.now()}-${Math.random().toString(16).slice(2)}.${ext}`;
-      const path = `${window.MMUtils.slugify(slug || "produit")}/${cleanName}`;
+      const path = `${window.MMUtils.slugify(folder || "image")}/${cleanName}`;
       const { error } = await client.storage.from(bucket).upload(path, file, {
         cacheControl: "3600",
         upsert: false
@@ -99,6 +99,35 @@
     }
 
     return urls;
+  };
+
+  const uploadProductImages = async (files, slug) => uploadImages(files, slug || "produit");
+
+  const uploadCategoryImage = async (file, category) => {
+    const urls = await uploadImages(file ? [file] : [], `categories/${category || "categorie"}`);
+    return urls[0] || "";
+  };
+
+  const getSiteSetting = async (key) => {
+    if (!client) throw new Error("Supabase n'est pas encore configure.");
+    const { data, error } = await client
+      .from("site_settings")
+      .select("key,value")
+      .eq("key", key)
+      .maybeSingle();
+    if (error) throw error;
+    return data ? data.value : null;
+  };
+
+  const setSiteSetting = async (key, value) => {
+    if (!client) throw new Error("Supabase n'est pas encore configure.");
+    const { data, error } = await client
+      .from("site_settings")
+      .upsert({ key, value }, { onConflict: "key" })
+      .select("key,value")
+      .single();
+    if (error) throw error;
+    return data.value;
   };
 
   const removeProductImageByUrl = async (url) => {
@@ -153,7 +182,10 @@
     updateProduct,
     deleteProduct,
     uploadProductImages,
+    uploadCategoryImage,
     removeProductImageByUrl,
+    getSiteSetting,
+    setSiteSetting,
     signInAdmin,
     signOut,
     getSession,

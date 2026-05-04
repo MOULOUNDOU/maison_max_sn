@@ -30,6 +30,24 @@
         "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=500&q=80"
     },
     {
+      key: "pantalons",
+      label: "Pantalons",
+      image:
+        "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=500&q=80"
+    },
+    {
+      key: "vetements-femme",
+      label: "Femme",
+      image:
+        "https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?auto=format&fit=crop&w=500&q=80"
+    },
+    {
+      key: "vetements-homme",
+      label: "Homme",
+      image:
+        "https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=500&q=80"
+    },
+    {
       key: "chaussures",
       label: "Chaussures",
       image:
@@ -94,6 +112,21 @@
     ],
     chemises: [
       "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?auto=format&fit=crop&w=900&q=82"
+    ],
+    pantalons: [
+      "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=900&q=82"
+    ],
+    "vetements-femme": [
+      "https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=900&q=82",
+      "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=900&q=82"
+    ],
+    "vetements-homme": [
+      "https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=900&q=82",
       "https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=900&q=82",
       "https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?auto=format&fit=crop&w=900&q=82"
     ],
@@ -918,9 +951,6 @@
       categories.forEach((category) => {
         select.appendChild(utils.createEl("option", { attrs: { value: category.key }, text: category.label }));
       });
-      ["vetements-femme", "vetements-homme", "pantalons"].forEach((key) => {
-        select.appendChild(utils.createEl("option", { attrs: { value: key }, text: getCategoryLabel(key) }));
-      });
       select.value = current || "all";
     });
   };
@@ -1082,6 +1112,23 @@
       }))
     });
     document.head.appendChild(script);
+  };
+
+  const loadCategoryImageSettings = async () => {
+    if (isDemoMode() || !window.MMSupabase.getSiteSetting) return;
+
+    try {
+      const imageSettings = await window.MMSupabase.getSiteSetting("category_images");
+      if (!imageSettings || typeof imageSettings !== "object") return;
+
+      categories.forEach((category) => {
+        if (imageSettings[category.key]) {
+          category.image = imageSettings[category.key];
+        }
+      });
+    } catch (error) {
+      // Keep the built-in category images if Supabase settings cannot load.
+    }
   };
 
   const hydrateProductPage = async () => {
@@ -1314,8 +1361,9 @@
     }
   };
 
-  const initHome = () => {
+  const initHome = async () => {
     if (!document.querySelector("[data-products-grid]")) return;
+    await loadCategoryImageSettings();
     syncCategoryOptions();
     renderCategories();
     bindFilters();

@@ -4,6 +4,21 @@
   const utils = window.MMUtils;
   const api = window.MMSupabase;
   const maxProductImages = 3;
+  const adminProductsPageSize = 8;
+
+  const categoryDefaultImages = {
+    robes: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=500&q=80",
+    boubous: "https://images.unsplash.com/photo-1608755728617-aefab37d2edd?auto=format&fit=crop&w=500&q=80",
+    ensembles: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=500&q=80",
+    chemises: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=500&q=80",
+    pantalons: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=500&q=80",
+    chaussures: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=80",
+    sacs: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=500&q=80",
+    accessoires: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=500&q=80",
+    "vetements-enfants": "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=500&q=80",
+    "vetements-homme": "https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=500&q=80",
+    "vetements-femme": "https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?auto=format&fit=crop&w=500&q=80"
+  };
 
   const categories = [
     ["robes", "Robes"],
@@ -24,7 +39,9 @@
     filtered: [],
     editingId: null,
     ready: false,
-    previewObjectUrls: []
+    previewObjectUrls: [],
+    productsPage: 1,
+    categoryImages: {}
   };
 
   const elements = {};
@@ -36,6 +53,8 @@
     elements.loginForm = document.querySelector("[data-login-form]");
     elements.productForm = document.querySelector("[data-product-form]");
     elements.productList = document.querySelector("[data-admin-product-list]");
+    elements.productPagination = document.querySelector("[data-admin-products-pagination]");
+    elements.categoryImageList = document.querySelector("[data-category-image-list]");
     elements.search = document.querySelector("[data-admin-search]");
     elements.category = document.querySelector("[data-admin-category]");
     elements.status = document.querySelector("[data-admin-status]");
@@ -243,6 +262,73 @@
     return holder;
   };
 
+  const getPageWindow = (current, total) => {
+    if (total <= 5) return Array.from({ length: total }, (_, index) => index + 1);
+    const pages = new Set([1, total, current, current - 1, current + 1]);
+    return [...pages].filter((page) => page >= 1 && page <= total).sort((a, b) => a - b);
+  };
+
+  const setProductsPage = (page) => {
+    const totalPages = Math.max(1, Math.ceil(state.filtered.length / adminProductsPageSize));
+    state.productsPage = Math.min(Math.max(1, Number(page) || 1), totalPages);
+    renderProducts();
+  };
+
+  const renderProductsPagination = (totalPages) => {
+    const holder = elements.productPagination;
+    if (!holder) return;
+    holder.replaceChildren();
+
+    if (!state.filtered.length) {
+      holder.hidden = true;
+      return;
+    }
+
+    holder.hidden = false;
+
+    const makeButton = (label, page, options = {}) => {
+      const button = utils.createEl("button", {
+        className: `pagination-btn ${options.current ? "is-current" : ""}`,
+        attrs: {
+          type: "button",
+          disabled: options.disabled ? "disabled" : null,
+          "aria-label": options.ariaLabel || `Page ${page}`,
+          "aria-current": options.current ? "page" : null
+        }
+      });
+      button.innerHTML = label;
+      if (!options.disabled && !options.current) {
+        button.addEventListener("click", () => setProductsPage(page));
+      }
+      return button;
+    };
+
+    holder.appendChild(
+      makeButton('<i class="fa-solid fa-chevron-left"></i>', state.productsPage - 1, {
+        disabled: state.productsPage === 1,
+        ariaLabel: "Page precedente"
+      })
+    );
+
+    const pages = utils.createEl("div", { className: "pagination-pages" });
+    let previous = 0;
+    getPageWindow(state.productsPage, totalPages).forEach((page) => {
+      if (previous && page - previous > 1) {
+        pages.appendChild(utils.createEl("span", { className: "pagination-gap", text: "..." }));
+      }
+      pages.appendChild(makeButton(String(page), page, { current: page === state.productsPage }));
+      previous = page;
+    });
+    holder.appendChild(pages);
+
+    holder.appendChild(
+      makeButton('<i class="fa-solid fa-chevron-right"></i>', state.productsPage + 1, {
+        disabled: state.productsPage === totalPages,
+        ariaLabel: "Page suivante"
+      })
+    );
+  };
+
   const renderProducts = () => {
     const list = elements.productList;
     if (!list) return;
@@ -250,10 +336,16 @@
 
     if (!state.filtered.length) {
       list.appendChild(utils.createEl("div", { className: "empty-state", text: "Aucun produit trouve." }));
+      renderProductsPagination(0);
       return;
     }
 
-    state.filtered.forEach((product) => {
+    const totalPages = Math.max(1, Math.ceil(state.filtered.length / adminProductsPageSize));
+    state.productsPage = Math.min(Math.max(1, state.productsPage), totalPages);
+    const start = (state.productsPage - 1) * adminProductsPageSize;
+    const products = state.filtered.slice(start, start + adminProductsPageSize);
+
+    products.forEach((product) => {
       const row = utils.createEl("article", { className: "admin-product-row" });
       row.appendChild(
         utils.createEl("img", {
@@ -285,6 +377,8 @@
       row.append(info, actions);
       list.appendChild(row);
     });
+
+    renderProductsPagination(totalPages);
   };
 
   const applyFilters = () => {
@@ -292,6 +386,7 @@
     const category = elements.category.value || "all";
     const status = elements.status.value || "all";
 
+    state.productsPage = 1;
     state.filtered = state.products.filter((product) => {
       const matchesTerm = !term || [product.name, product.slug, product.category, product.subcategory]
         .join(" ")
@@ -329,6 +424,122 @@
     }
   };
 
+  const getCategoryImage = (key) => state.categoryImages[key] || categoryDefaultImages[key] || utils.fallbackImage;
+
+  const saveCategoryImagesSetting = async () => {
+    await api.setSiteSetting("category_images", state.categoryImages);
+  };
+
+  const saveCategoryImage = async (row, key) => {
+    const input = row.querySelector("[data-category-image-url]");
+    const fileInput = row.querySelector("[data-category-image-upload]");
+    const button = row.querySelector("[data-category-image-save]");
+    utils.setButtonLoading(button, true, "...");
+
+    try {
+      const file = fileInput.files && fileInput.files[0];
+      const uploadedUrl = file ? await api.uploadCategoryImage(file, key) : "";
+      const url = uploadedUrl || input.value.trim();
+
+      if (url) state.categoryImages[key] = url;
+      else delete state.categoryImages[key];
+
+      await saveCategoryImagesSetting();
+      utils.toast("Image de categorie mise a jour");
+      renderCategoryImages();
+    } catch (error) {
+      utils.toast(error.message || "Mise a jour impossible", "error");
+    } finally {
+      utils.setButtonLoading(button, false);
+    }
+  };
+
+  const resetCategoryImage = async (key) => {
+    try {
+      delete state.categoryImages[key];
+      await saveCategoryImagesSetting();
+      utils.toast("Image de categorie restauree");
+      renderCategoryImages();
+    } catch (error) {
+      utils.toast(error.message || "Restauration impossible", "error");
+    }
+  };
+
+  const renderCategoryImages = () => {
+    if (!elements.categoryImageList) return;
+    elements.categoryImageList.replaceChildren();
+
+    categories.forEach(([key, label]) => {
+      const row = utils.createEl("article", { className: "admin-category-image-row" });
+      const image = utils.createEl("img", {
+        attrs: { src: getCategoryImage(key), alt: label, loading: "lazy" }
+      });
+
+      const content = utils.createEl("div", { className: "admin-category-image-content" });
+      content.appendChild(utils.createEl("h3", { text: label }));
+
+      const field = utils.createEl("label", { className: "field-label" });
+      field.appendChild(utils.createEl("span", { text: "URL de l'image" }));
+      const input = utils.createEl("input", {
+        attrs: {
+          type: "url",
+          value: state.categoryImages[key] || "",
+          placeholder: categoryDefaultImages[key] || "https://...",
+          "data-category-image-url": ""
+        }
+      });
+      field.appendChild(input);
+
+      const upload = utils.createEl("label", { className: "field-label" });
+      upload.appendChild(utils.createEl("span", { text: "Upload" }));
+      const fileInput = utils.createEl("input", {
+        attrs: { type: "file", accept: "image/*", "data-category-image-upload": "" }
+      });
+      upload.appendChild(fileInput);
+
+      const actions = utils.createEl("div", { className: "admin-category-image-actions" });
+      const save = utils.createEl("button", {
+        className: "btn btn-primary btn-sm",
+        attrs: { type: "button", "data-category-image-save": "" }
+      });
+      save.innerHTML = '<i class="fa-solid fa-floppy-disk"></i><span>Enregistrer</span>';
+      const reset = utils.createEl("button", {
+        className: "btn btn-light btn-sm",
+        attrs: { type: "button" }
+      });
+      reset.innerHTML = '<i class="fa-solid fa-rotate-left"></i><span>Defaut</span>';
+      actions.append(save, reset);
+
+      input.addEventListener("input", () => {
+        image.src = input.value.trim() || getCategoryImage(key);
+      });
+      fileInput.addEventListener("change", () => {
+        const file = fileInput.files && fileInput.files[0];
+        if (file) image.src = URL.createObjectURL(file);
+      });
+      save.addEventListener("click", () => saveCategoryImage(row, key));
+      reset.addEventListener("click", () => resetCategoryImage(key));
+
+      content.append(field, upload, actions);
+      row.append(image, content);
+      elements.categoryImageList.appendChild(row);
+    });
+  };
+
+  const loadCategoryImages = async () => {
+    if (!elements.categoryImageList || !api.getSiteSetting) return;
+
+    try {
+      const value = await api.getSiteSetting("category_images");
+      state.categoryImages = value && typeof value === "object" ? value : {};
+    } catch (error) {
+      state.categoryImages = {};
+      utils.toast("Impossible de charger les images des categories", "error");
+    }
+
+    renderCategoryImages();
+  };
+
   const handleLogin = async (event) => {
     event.preventDefault();
     const button = elements.loginForm.querySelector("button[type='submit']");
@@ -344,7 +555,7 @@
         throw new Error("Ce compte n'a pas les droits vendeur.");
       }
       showOnly(elements.app);
-      await loadProducts();
+      await Promise.all([loadProducts(), loadCategoryImages()]);
     } catch (error) {
       utils.toast(error.message || "Connexion impossible", "error");
     } finally {
@@ -441,7 +652,7 @@
     }
 
     showOnly(elements.app);
-    await loadProducts();
+    await Promise.all([loadProducts(), loadCategoryImages()]);
   };
 
   document.addEventListener("DOMContentLoaded", init);
