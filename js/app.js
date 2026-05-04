@@ -454,7 +454,9 @@
 
   const getProductsPageSize = () => {
     const isMobile = window.matchMedia && window.matchMedia("(max-width: 820px)").matches;
+    const isLargeScreen = window.matchMedia && window.matchMedia("(min-width: 1100px)").matches;
     const isHomePage = document.body.classList.contains("home-page");
+    if (isLargeScreen) return 10;
     if (isHomePage) return isMobile ? 4 : 6;
     return isMobile ? 6 : 8;
   };
