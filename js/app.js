@@ -521,8 +521,15 @@
   };
 
   const getProductGallery = (product) => {
+    const savedGallery = utils.unique([product.main_image, ...(product.images || [])]);
+    const isDemoProduct = String(product.id || "").startsWith("demo-");
+
+    if (!isDemoProduct) {
+      return savedGallery.length ? savedGallery : [utils.fallbackImage];
+    }
+
     const fallback = categoryGalleryImages[product.category] || fallbackGalleryImages;
-    const gallery = utils.unique([product.main_image, ...(product.images || []), ...fallback, ...fallbackGalleryImages]);
+    const gallery = utils.unique([...savedGallery, ...fallback, ...fallbackGalleryImages]);
     return gallery.slice(0, Math.max(3, Math.min(gallery.length, 5)));
   };
 
