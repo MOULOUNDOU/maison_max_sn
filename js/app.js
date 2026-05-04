@@ -409,7 +409,7 @@
     search: "",
     minPrice: "",
     maxPrice: "",
-    sort: "category",
+    sort: "random",
     page: 1,
     loading: true,
     error: ""
@@ -436,6 +436,14 @@
         categoryRank(a.category) - categoryRank(b.category) ||
         new Date(b.created_at) - new Date(a.created_at)
     );
+
+  const shuffleProducts = (products) => {
+    for (let index = products.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [products[index], products[swapIndex]] = [products[swapIndex], products[index]];
+    }
+    return products;
+  };
 
   const isDemoMode = () => !window.MMSupabase || !window.MMSupabase.isConfigured;
 
@@ -496,7 +504,8 @@
     if (min > 0) products = products.filter((product) => product.price >= min);
     if (max > 0) products = products.filter((product) => product.price <= max);
 
-    if (state.sort === "category") sortByCategory(products);
+    if (state.sort === "random") shuffleProducts(products);
+    else if (state.sort === "category") sortByCategory(products);
     else if (state.sort === "price-asc") products.sort((a, b) => a.price - b.price);
     else if (state.sort === "price-desc") products.sort((a, b) => b.price - a.price);
     else if (state.sort === "promo") {
