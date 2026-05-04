@@ -96,11 +96,11 @@
               <div class="form-grid two">
                 <label class="field-label">
                   <span>Prix</span>
-                  <input type="number" name="price" min="1" step="100" required />
+                  <input type="text" name="price" inputmode="numeric" placeholder="Ex: 15000 ou 15 000" required />
                 </label>
                 <label class="field-label">
                   <span>Ancien prix</span>
-                  <input type="number" name="old_price" min="1" step="100" />
+                  <input type="text" name="old_price" inputmode="numeric" placeholder="Optionnel" />
                 </label>
               </div>
 
@@ -126,17 +126,34 @@
                 </label>
               </div>
 
-              <label class="field-label">
-                <span>Images existantes</span>
-                <textarea name="existing_images" rows="3" placeholder="URLs separees par des virgules"></textarea>
-              </label>
+              <div class="admin-gallery-panel">
+                <div class="admin-gallery-head">
+                  <span>Images produit</span>
+                  <small>3 images maximum, la premiere devient l'image principale.</small>
+                </div>
+                <div class="admin-image-url-grid">
+                  <label class="field-label">
+                    <span>Image 1 par URL</span>
+                    <input type="url" name="image_url_1" data-image-url placeholder="https://..." />
+                  </label>
+                  <label class="field-label">
+                    <span>Image 2 par URL</span>
+                    <input type="url" name="image_url_2" data-image-url placeholder="https://..." />
+                  </label>
+                  <label class="field-label">
+                    <span>Image 3 par URL</span>
+                    <input type="url" name="image_url_3" data-image-url placeholder="https://..." />
+                  </label>
+                </div>
 
-              <label class="field-label">
-                <span>Uploader des images</span>
-                <input id="product-images" type="file" name="images" accept="image/*" multiple />
-              </label>
+                <label class="field-label">
+                  <span>Uploader des images</span>
+                  <input id="product-images" type="file" name="images" accept="image/*" multiple data-image-upload />
+                  <small class="field-help">Vous pouvez melanger URLs et uploads, mais seules 3 images seront enregistrees.</small>
+                </label>
 
-              <div class="admin-images-preview" data-images-preview></div>
+                <div class="admin-images-preview" data-images-preview></div>
+              </div>
 
               <div class="checkbox-grid">
                 <label><input type="checkbox" name="is_available" checked /> Disponible</label>

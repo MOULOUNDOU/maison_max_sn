@@ -3,6 +3,7 @@
 
   const utils = window.MMUtils;
   const api = window.MMSupabase;
+  const maxProductImages = 3;
 
   const categories = [
     ["robes", "Robes"],
@@ -22,7 +23,8 @@
     products: [],
     filtered: [],
     editingId: null,
-    ready: false
+    ready: false,
+    previewObjectUrls: []
   };
 
   const elements = {};
@@ -44,6 +46,8 @@
     elements.imagesPreview = document.querySelector("[data-images-preview]");
     elements.slug = document.querySelector("#product-slug");
     elements.name = document.querySelector("#product-name");
+    elements.imageUpload = document.querySelector("[data-image-upload]");
+    elements.imageUrlInputs = Array.from(document.querySelectorAll("[data-image-url]"));
   };
 
   const showOnly = (section) => {
@@ -78,23 +82,54 @@
     return "";
   };
 
+  const parsePriceValue = (value) => {
+    const digits = String(value || "").replace(/[^\d]/g, "");
+    return digits ? Number(digits) : 0;
+  };
+
+  const formatPriceInput = (value) => {
+    const amount = Number(value || 0);
+    return amount > 0 ? new Intl.NumberFormat("fr-FR").format(amount) : "";
+  };
+
+  const getImageUrls = () =>
+    utils
+      .unique(elements.imageUrlInputs.map((input) => input.value.trim()))
+      .slice(0, maxProductImages);
+
+  const setImageUrls = (urls = []) => {
+    elements.imageUrlInputs.forEach((input, index) => {
+      input.value = urls[index] || "";
+    });
+  };
+
+  const getSelectedImageFiles = (availableSlots = maxProductImages) =>
+    Array.from(elements.imageUpload?.files || [])
+      .filter((file) => file.type.startsWith("image/"))
+      .slice(0, Math.max(0, availableSlots));
+
+  const revokePreviewUrls = () => {
+    state.previewObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+    state.previewObjectUrls = [];
+  };
+
   const getFormPayload = async () => {
     const form = elements.productForm;
     const data = new FormData(form);
     const name = String(data.get("name") || "").trim();
     const slug = utils.slugify(data.get("slug") || name);
-    const existingImages = utils.normalizeArray(data.get("existing_images"));
-    const files = Array.from(form.querySelector("#product-images").files || []);
+    const existingImages = getImageUrls();
+    const files = getSelectedImageFiles(maxProductImages - existingImages.length);
     const uploadedImages = files.length ? await api.uploadProductImages(files, slug) : [];
-    const images = utils.unique([...existingImages, ...uploadedImages]);
+    const images = utils.unique([...existingImages, ...uploadedImages]).slice(0, maxProductImages);
 
     return {
       name,
       slug,
       short_description: String(data.get("short_description") || "").trim(),
       description: String(data.get("description") || "").trim(),
-      price: Number(data.get("price") || 0),
-      old_price: data.get("old_price") ? Number(data.get("old_price")) : null,
+      price: parsePriceValue(data.get("price")),
+      old_price: parsePriceValue(data.get("old_price")) || null,
       category: String(data.get("category") || "").trim(),
       subcategory: String(data.get("subcategory") || "").trim(),
       sizes: utils.normalizeArray(data.get("sizes")),
@@ -111,17 +146,41 @@
     state.editingId = null;
     elements.productForm.reset();
     elements.productForm.querySelector("[name='is_available']").checked = true;
-    elements.productForm.querySelector("[name='existing_images']").value = "";
-    elements.imagesPreview.replaceChildren();
+    setImageUrls();
+    revokePreviewUrls();
+    renderImagePreview();
     elements.formTitle.textContent = "Ajouter un produit";
     elements.cancelEdit.hidden = true;
   };
 
-  const previewImages = (urls) => {
+  const renderImagePreview = () => {
+    revokePreviewUrls();
     elements.imagesPreview.replaceChildren();
-    urls.forEach((url) => {
+    const imageUrls = getImageUrls();
+    const files = getSelectedImageFiles(maxProductImages - imageUrls.length);
+    const previews = [
+      ...imageUrls.map((url, index) => ({ src: url, label: `URL ${index + 1}` })),
+      ...files.map((file, index) => {
+        const src = URL.createObjectURL(file);
+        state.previewObjectUrls.push(src);
+        return { src, label: `Upload ${index + 1}` };
+      })
+    ].slice(0, maxProductImages);
+
+    if (!previews.length) {
+      elements.imagesPreview.appendChild(
+        utils.createEl("div", {
+          className: "admin-image-empty",
+          text: "Aucune image selectionnee."
+        })
+      );
+      return;
+    }
+
+    previews.forEach((preview) => {
       const wrap = utils.createEl("div", { className: "admin-image-thumb" });
-      wrap.appendChild(utils.createEl("img", { attrs: { src: url, alt: "Image produit", loading: "lazy" } }));
+      wrap.appendChild(utils.createEl("img", { attrs: { src: preview.src, alt: "Image produit", loading: "lazy" } }));
+      wrap.appendChild(utils.createEl("span", { text: preview.label }));
       elements.imagesPreview.appendChild(wrap);
     });
   };
@@ -133,19 +192,20 @@
     form.elements.slug.value = product.slug;
     form.elements.short_description.value = product.short_description || "";
     form.elements.description.value = product.description || "";
-    form.elements.price.value = product.price;
-    form.elements.old_price.value = product.old_price || "";
+    form.elements.price.value = formatPriceInput(product.price);
+    form.elements.old_price.value = formatPriceInput(product.old_price);
     form.elements.category.value = product.category;
     form.elements.subcategory.value = product.subcategory || "";
     form.elements.sizes.value = (product.sizes || []).join(", ");
     form.elements.colors.value = (product.colors || []).join(", ");
-    form.elements.existing_images.value = utils.unique([product.main_image, ...(product.images || [])]).join(", ");
+    setImageUrls(utils.unique([product.main_image, ...(product.images || [])]).slice(0, maxProductImages));
+    if (elements.imageUpload) elements.imageUpload.value = "";
     form.elements.is_available.checked = product.is_available;
     form.elements.is_featured.checked = product.is_featured;
     form.elements.is_promo.checked = product.is_promo;
     elements.formTitle.textContent = "Modifier le produit";
     elements.cancelEdit.hidden = false;
-    previewImages(utils.unique([product.main_image, ...(product.images || [])]));
+    renderImagePreview();
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -340,9 +400,20 @@
       }
     });
 
-    elements.productForm.elements.existing_images.addEventListener("input", () => {
-      previewImages(utils.normalizeArray(elements.productForm.elements.existing_images.value));
+    elements.imageUrlInputs.forEach((input) => {
+      input.addEventListener("input", renderImagePreview);
     });
+
+    elements.imageUpload.addEventListener("change", () => {
+      const urls = getImageUrls();
+      const files = Array.from(elements.imageUpload.files || []);
+      if (urls.length + files.length > maxProductImages) {
+        utils.toast("Seules 3 images seront enregistrees pour ce produit.", "error");
+      }
+      renderImagePreview();
+    });
+
+    renderImagePreview();
   };
 
   const init = async () => {

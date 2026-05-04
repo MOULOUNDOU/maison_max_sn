@@ -453,8 +453,10 @@
   };
 
   const getProductsPageSize = () => {
-    if (window.matchMedia && window.matchMedia("(max-width: 820px)").matches) return 6;
-    return 8;
+    const isMobile = window.matchMedia && window.matchMedia("(max-width: 820px)").matches;
+    const isHomePage = document.body.classList.contains("home-page");
+    if (isHomePage) return isMobile ? 4 : 6;
+    return isMobile ? 6 : 8;
   };
 
   const getPageWindow = (current, total) => {
