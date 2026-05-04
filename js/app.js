@@ -702,7 +702,7 @@
     if (!holder) return;
     holder.replaceChildren();
 
-    if (state.loading || totalPages <= 1) {
+    if (state.loading || totalPages < 1) {
       holder.hidden = true;
       return;
     }
