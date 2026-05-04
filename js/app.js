@@ -73,6 +73,18 @@
     }
   ];
 
+  const featuredCategoryKeys = [
+    "robes",
+    "boubous",
+    "ensembles",
+    "chemises",
+    "pantalons",
+    "vetements-femme",
+    "vetements-homme",
+    "chaussures",
+    "sacs"
+  ];
+
   const categoryOrder = [
     "robes",
     "boubous",
@@ -862,15 +874,20 @@
       return button;
     };
 
-    categories.forEach((category) => {
+    const featuredCategories = categories.filter((category) => featuredCategoryKeys.includes(category.key));
+
+    featuredCategories.forEach((category) => {
       if (holder) holder.appendChild(createCategoryButton(category, "category-circle"));
+    });
+
+    categories.forEach((category) => {
       if (menuHolder) menuHolder.appendChild(createCategoryButton(category, "menu-category-card"));
     });
 
     if (holder) {
       const track = utils.createEl("div", { className: "category-circles-track" });
       while (holder.firstChild) track.appendChild(holder.firstChild);
-      categories.forEach((category) => {
+      featuredCategories.forEach((category) => {
         const dup = createCategoryButton(category, "category-circle");
         dup.classList.add("category-circle-dup");
         track.appendChild(dup);
@@ -1131,6 +1148,34 @@
     }
   };
 
+  const createProductChoice = (label, items, name) => {
+    if (!items || !items.length) return null;
+    const wrap = utils.createEl("label", { className: "field-label product-choice-field" });
+    wrap.appendChild(utils.createEl("span", { text: label }));
+    const input = utils.createEl("select", { attrs: { name, required: "required" } });
+    input.appendChild(utils.createEl("option", { attrs: { value: "" }, text: `Choisir ${label.toLowerCase()}` }));
+    items.forEach((item) => input.appendChild(utils.createEl("option", { attrs: { value: item }, text: item })));
+    wrap.appendChild(input);
+    return { wrap, input };
+  };
+
+  const createProductService = (icon, title, text) => {
+    const item = utils.createEl("article", { className: "product-service-item" });
+    item.appendChild(utils.createEl("i", { className: icon.includes(" ") ? icon : `fa-solid ${icon}` }));
+    const body = utils.createEl("div");
+    body.appendChild(utils.createEl("strong", { text: title }));
+    body.appendChild(utils.createEl("span", { text }));
+    item.appendChild(body);
+    return item;
+  };
+
+  const createProductInfoPanel = (title, children = []) => {
+    const panel = utils.createEl("article", { className: "product-detail-panel" });
+    panel.appendChild(utils.createEl("h2", { text: title }));
+    children.forEach((child) => panel.appendChild(child));
+    return panel;
+  };
+
   const hydrateProductPage = async () => {
     const detail = document.querySelector("[data-product-page]");
     if (!detail) return;
@@ -1162,17 +1207,49 @@
       return;
     }
 
+    let relatedProducts = [];
+    try {
+      if (window.MMSupabase && window.MMSupabase.isConfigured) {
+        relatedProducts = await window.MMSupabase.listProducts({ category: product.category });
+      } else {
+        relatedProducts = demoProducts.filter((item) => item.category === product.category);
+      }
+    } catch (error) {
+      relatedProducts = demoProducts.filter((item) => item.category === product.category);
+    }
+    relatedProducts = relatedProducts.filter((item) => item.slug !== product.slug).slice(0, 4);
+
     document.title = `${product.name} | Maison Max Senegal`;
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) metaDescription.setAttribute("content", product.short_description || product.description);
+    const breadcrumbCurrent = document.querySelector(".breadcrumb span");
+    if (breadcrumbCurrent) breadcrumbCurrent.textContent = product.name;
 
     detail.replaceChildren();
+    const galleryImages = getProductGallery(product);
     const imageWrap = utils.createEl("div", { className: "product-page-gallery" });
-    imageWrap.appendChild(
-      utils.createEl("img", {
-        attrs: { src: product.main_image || utils.fallbackImage, alt: product.name, loading: "eager" }
-      })
-    );
+    const mainImage = utils.createEl("img", {
+      className: "product-detail-main-image",
+      attrs: { src: galleryImages[0] || utils.fallbackImage, alt: product.name, loading: "eager" }
+    });
+    imageWrap.appendChild(mainImage);
+
+    if (galleryImages.length > 1) {
+      const thumbs = utils.createEl("div", { className: "product-detail-thumbs" });
+      galleryImages.forEach((src, index) => {
+        const button = utils.createEl("button", {
+          className: index === 0 ? "is-active" : "",
+          attrs: { type: "button", "aria-label": `Image ${index + 1} de ${product.name}` }
+        });
+        button.appendChild(utils.createEl("img", { attrs: { src, alt: product.name, loading: "lazy" } }));
+        button.addEventListener("click", () => {
+          mainImage.src = src;
+          thumbs.querySelectorAll("button").forEach((item) => item.classList.toggle("is-active", item === button));
+        });
+        thumbs.appendChild(button);
+      });
+      imageWrap.appendChild(thumbs);
+    }
 
     const info = utils.createEl("div", { className: "product-page-info" });
     const labels = utils.createEl("div", { className: "modal-label-row" });
@@ -1182,36 +1259,104 @@
     info.appendChild(labels);
     info.appendChild(utils.createEl("p", { className: "product-category", text: getCategoryLabel(product.category) }));
     info.appendChild(utils.createEl("h1", { text: product.name }));
-    info.appendChild(utils.createEl("p", { className: "lead-text", text: product.description || product.short_description }));
+    info.appendChild(utils.createEl("p", { className: "lead-text", text: product.short_description || product.description }));
     info.appendChild(createPriceNode(product));
 
     const form = utils.createEl("form", { className: "option-form product-page-form" });
-    const sizeSelect = createOptionSelect("Taille", product.sizes, "size");
-    const colorSelect = createOptionSelect("Couleur", product.colors, "color");
+    const sizeSelect = createProductChoice("Taille", product.sizes, "size");
+    const colorSelect = createProductChoice("Couleur", product.colors, "color");
     if (sizeSelect) form.appendChild(sizeSelect.wrap);
     if (colorSelect) form.appendChild(colorSelect.wrap);
-    const qtyWrap = utils.createEl("label", { className: "field-label" });
+    const qtyWrap = utils.createEl("label", { className: "field-label product-choice-field" });
     qtyWrap.appendChild(utils.createEl("span", { text: "Quantite" }));
-    const qty = utils.createEl("input", { attrs: { type: "number", min: "1", value: "1" } });
+    const qty = utils.createEl("input", { attrs: { type: "number", min: "1", value: "1", inputmode: "numeric" } });
     qtyWrap.appendChild(qty);
     form.appendChild(qtyWrap);
+    const actions = utils.createEl("div", { className: "product-page-actions" });
     const addButton = utils.createEl("button", {
       className: "btn btn-primary",
       attrs: { type: "submit", disabled: product.is_available ? null : "disabled" }
     });
     addButton.innerHTML = '<i class="fa-solid fa-cart-plus"></i><span>Ajouter au panier</span>';
-    form.appendChild(addButton);
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
+    const whatsappButton = utils.createEl("button", {
+      className: "btn btn-outline",
+      attrs: { type: "button", disabled: product.is_available ? null : "disabled" }
+    });
+    whatsappButton.innerHTML = '<i class="fa-brands fa-whatsapp"></i><span>Commander sur WhatsApp</span>';
+    actions.append(addButton, whatsappButton);
+    form.appendChild(actions);
+
+    const addCurrentToCart = () => {
       window.MMCart.add(product, {
         size: sizeSelect ? sizeSelect.input.value : "",
         color: colorSelect ? colorSelect.input.value : "",
         quantity: qty.value
       });
+    };
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      addCurrentToCart();
       window.MMCart.openCart();
     });
+
+    whatsappButton.addEventListener("click", () => {
+      if (!form.reportValidity()) return;
+      addCurrentToCart();
+      window.MMCart.checkoutWhatsApp();
+    });
+
     info.appendChild(form);
+
+    const services = utils.createEl("div", { className: "product-service-grid" });
+    services.appendChild(createProductService("fa-truck-fast", "Livraison rapide", "Dakar, banlieue et grandes villes selon disponibilite."));
+    services.appendChild(createProductService("fa-brands fa-whatsapp", "Commande WhatsApp", "Validation simple du panier et confirmation directe."));
+    services.appendChild(createProductService("fa-rotate-left", "Verification possible", "Controle selon les conditions de livraison et de disponibilite."));
+    services.appendChild(createProductService("fa-headset", "Support client", "Conseils tailles, couleurs et disponibilites sur WhatsApp."));
+    info.appendChild(services);
+
     detail.append(imageWrap, info);
+
+    const descriptionText = product.description || product.short_description || "Description detaillee a venir.";
+    const detailList = utils.createEl("dl", { className: "product-detail-list" });
+    [
+      ["Categorie", getCategoryLabel(product.category)],
+      ["Sous-categorie", product.subcategory || "Non precisee"],
+      ["Tailles", product.sizes && product.sizes.length ? product.sizes.join(", ") : "Selon disponibilite"],
+      ["Couleurs", product.colors && product.colors.length ? product.colors.join(", ") : "Selon disponibilite"],
+      ["Disponibilite", product.is_available ? "Disponible" : "Rupture"]
+    ].forEach(([term, value]) => {
+      detailList.appendChild(utils.createEl("dt", { text: term }));
+      detailList.appendChild(utils.createEl("dd", { text: value }));
+    });
+
+    const detailSections = utils.createEl("section", { className: "product-detail-sections" });
+    detailSections.appendChild(createProductInfoPanel("Description", [utils.createEl("p", { text: descriptionText })]));
+    detailSections.appendChild(createProductInfoPanel("Details du produit", [detailList]));
+    detailSections.appendChild(
+      createProductInfoPanel("Livraison & commande", [
+        utils.createEl("p", {
+          text: "Ajoutez l'article au panier, choisissez votre ville de livraison, puis envoyez la commande sur WhatsApp pour finaliser avec Maison Max."
+        })
+      ])
+    );
+    detail.appendChild(detailSections);
+
+    if (relatedProducts.length) {
+      const related = utils.createEl("section", { className: "related-products-section" });
+      const header = utils.createEl("div", { className: "section-heading compact" });
+      const titleWrap = utils.createEl("div");
+      titleWrap.appendChild(utils.createEl("span", { text: "Selection Maison Max" }));
+      titleWrap.appendChild(utils.createEl("h2", { text: "Produits similaires" }));
+      header.appendChild(titleWrap);
+      related.appendChild(header);
+      const grid = utils.createEl("div", { className: "products-grid related-products-grid" });
+      relatedProducts.forEach((item) => grid.appendChild(createProductCard(item)));
+      related.appendChild(grid);
+      detail.appendChild(related);
+      startProductCarousels();
+    }
 
     utils.safeJsonLd({
       "@context": "https://schema.org",

@@ -6,6 +6,9 @@
     <title>Espace vendeur | Maison Max</title>
     <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" href="assets/logo-maison-max.jpg" type="image/jpeg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
@@ -54,217 +57,373 @@
       </section>
 
       <section class="container admin-app" data-admin-app hidden>
-        <div class="admin-title-row">
-          <div>
-            <span>Espace vendeur</span>
-            <h1>Dashboard Maison Max</h1>
-          </div>
-          <button class="btn btn-light" type="button" data-admin-refresh>
-            <i class="fa-solid fa-rotate"></i><span>Actualiser</span>
-          </button>
-        </div>
+        <button class="admin-sidebar-toggle" type="button" data-admin-sidebar-toggle aria-controls="admin-sidebar" aria-expanded="false">
+          <i class="fa-solid fa-bars"></i><span>Menu admin</span>
+        </button>
+        <div class="admin-sidebar-overlay" data-admin-sidebar-overlay></div>
 
-        <div class="admin-dashboard" data-admin-dashboard>
-          <section class="admin-card admin-overview-card">
-            <div class="admin-card-header">
+        <div class="admin-shell">
+          <aside class="admin-sidebar" id="admin-sidebar" data-admin-sidebar aria-label="Navigation admin">
+            <div class="admin-sidebar-head">
+              <img src="assets/logo-maison-max.jpg" alt="Maison Max" width="54" height="54" />
               <div>
-                <h2>Vue generale</h2>
-                <p>Suivez rapidement l'etat du catalogue, les promotions et les produits a corriger.</p>
+                <strong>Maison Max</strong>
+                <span>Espace vendeur</span>
               </div>
-              <span class="admin-live-pill"><i class="fa-solid fa-circle"></i> Supabase connecte</span>
+              <button class="icon-btn admin-sidebar-close" type="button" data-admin-sidebar-close aria-label="Fermer le menu admin">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
             </div>
-            <div class="admin-stats-grid" data-dashboard-stats></div>
-          </section>
 
-          <div class="admin-dashboard-grid">
-            <section class="admin-card">
-              <div class="admin-card-header">
-                <div>
-                  <h2>Categories</h2>
-                  <p>Repartition des produits par univers.</p>
-                </div>
+            <nav class="admin-nav">
+              <div class="admin-nav-group">
+                <span class="admin-nav-label">Principal</span>
+                <button type="button" data-admin-nav="dashboard"><i class="fa-solid fa-chart-line"></i><span>Tableau de bord</span></button>
+                <button type="button" data-admin-nav="products"><i class="fa-solid fa-boxes-stacked"></i><span>Produits</span></button>
+                <button type="button" data-admin-nav="add-product"><i class="fa-solid fa-square-plus"></i><span>Ajouter un produit</span></button>
+                <button type="button" data-admin-nav="categories"><i class="fa-solid fa-layer-group"></i><span>Categories</span></button>
+                <button type="button" data-admin-nav="promotions"><i class="fa-solid fa-tags"></i><span>Promotions</span></button>
               </div>
-              <div class="admin-category-metrics" data-dashboard-categories></div>
-            </section>
+              <div class="admin-nav-group">
+                <span class="admin-nav-label">Gestion</span>
+                <button type="button" data-admin-nav="orders"><i class="fa-brands fa-whatsapp"></i><span>Commandes WhatsApp</span></button>
+                <button type="button" data-admin-nav="gallery"><i class="fa-solid fa-images"></i><span>Galerie / Images</span></button>
+                <button type="button" data-admin-nav="settings"><i class="fa-solid fa-gear"></i><span>Parametres boutique</span></button>
+              </div>
+            </nav>
 
-            <section class="admin-card">
-              <div class="admin-card-header">
-                <div>
-                  <h2>Actions rapides</h2>
-                  <p>Raccourcis utiles pour piloter la boutique.</p>
-                </div>
+            <div class="admin-sidebar-footer">
+              <a class="admin-sidebar-action" href="index.html"><i class="fa-solid fa-store"></i><span>Voir le site</span></a>
+              <button class="admin-sidebar-action" type="button" data-admin-logout><i class="fa-solid fa-right-from-bracket"></i><span>Deconnexion</span></button>
+            </div>
+          </aside>
+
+          <div class="admin-content">
+            <div class="admin-topbar">
+              <div class="admin-page-heading">
+                <span data-admin-section-kicker>Espace vendeur</span>
+                <h1 data-admin-section-title>Dashboard Maison Max</h1>
+                <p data-admin-section-subtitle>Suivi clair du catalogue Maison Max, des promotions et de la disponibilite.</p>
               </div>
-              <div class="admin-quick-actions">
-                <button class="btn btn-primary btn-sm" type="button" data-admin-scroll-form>
+              <label class="admin-top-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="search" data-admin-global-search placeholder="Rechercher un produit..." />
+              </label>
+              <div class="admin-top-actions">
+                <span class="admin-live-pill"><i class="fa-solid fa-circle"></i> Supabase connecte</span>
+                <button class="btn btn-primary btn-sm" type="button" data-admin-quick-add>
                   <i class="fa-solid fa-plus"></i><span>Ajouter</span>
                 </button>
-                <button class="btn btn-light btn-sm" type="button" data-admin-scroll-products>
-                  <i class="fa-solid fa-list-check"></i><span>Produits</span>
+                <button class="btn btn-light btn-sm" type="button" data-admin-refresh aria-label="Actualiser">
+                  <i class="fa-solid fa-rotate"></i><span>Actualiser</span>
                 </button>
-                <button class="btn btn-outline btn-sm" type="button" data-admin-export-csv>
-                  <i class="fa-solid fa-file-arrow-down"></i><span>Export CSV</span>
-                </button>
-                <a class="btn btn-light btn-sm" href="boutique.html#catalogue">
-                  <i class="fa-solid fa-shop"></i><span>Boutique</span>
-                </a>
               </div>
-              <div class="admin-health-list" data-dashboard-health></div>
-            </section>
+            </div>
 
-            <section class="admin-card">
-              <div class="admin-card-header">
-                <div>
-                  <h2>Derniers produits</h2>
-                  <p>Les ajouts et modifications les plus recents.</p>
+            <section class="admin-section" data-admin-section="dashboard">
+              <div class="admin-dashboard" data-admin-dashboard>
+                <section class="admin-card admin-overview-card">
+                  <div class="admin-card-header">
+                    <div>
+                      <h2>Vue generale</h2>
+                      <p>Suivez rapidement l'etat du catalogue, les promotions et les produits a corriger.</p>
+                    </div>
+                  </div>
+                  <div class="admin-stats-grid" data-dashboard-stats></div>
+                </section>
+
+                <div class="admin-charts-grid">
+                  <section class="admin-card admin-chart-card admin-chart-wide">
+                    <div class="admin-card-header">
+                      <div>
+                        <h2>Produits par categorie</h2>
+                        <p>Volume de produits par univers du catalogue.</p>
+                      </div>
+                    </div>
+                    <div class="admin-chart-body"><canvas data-admin-chart="categories"></canvas></div>
+                  </section>
+
+                  <section class="admin-card admin-chart-card">
+                    <div class="admin-card-header">
+                      <div>
+                        <h2>Disponibilite</h2>
+                        <p>Produits disponibles et ruptures.</p>
+                      </div>
+                    </div>
+                    <div class="admin-chart-body"><canvas data-admin-chart="availability"></canvas></div>
+                  </section>
+
+                  <section class="admin-card admin-chart-card">
+                    <div class="admin-card-header">
+                      <div>
+                        <h2>Promotions / vedettes</h2>
+                        <p>Articles promus et produits mis en avant.</p>
+                      </div>
+                    </div>
+                    <div class="admin-chart-body"><canvas data-admin-chart="promotions"></canvas></div>
+                  </section>
                 </div>
               </div>
-              <div class="admin-recent-list" data-dashboard-recent></div>
+            </section>
+
+            <section class="admin-section" data-admin-section="products" hidden>
+              <section class="admin-card product-admin-card">
+                <div class="admin-card-header">
+                  <div>
+                    <h2>Liste des produits</h2>
+                    <p>Recherchez, filtrez et gerez les fiches visibles dans le catalogue.</p>
+                  </div>
+                  <button class="btn btn-outline btn-sm" type="button" data-admin-export-csv>
+                    <i class="fa-solid fa-file-arrow-down"></i><span>Export CSV</span>
+                  </button>
+                </div>
+
+                <div class="admin-filters">
+                  <label class="field-label">
+                    <span>Recherche</span>
+                    <input type="search" data-admin-search placeholder="Nom, slug, categorie..." />
+                  </label>
+                  <label class="field-label">
+                    <span>Categorie</span>
+                    <select data-admin-category data-category-options="filter"></select>
+                  </label>
+                  <label class="field-label">
+                    <span>Statut</span>
+                    <select data-admin-status>
+                      <option value="all">Tous</option>
+                      <option value="available">Disponibles</option>
+                      <option value="unavailable">Rupture</option>
+                      <option value="featured">Vedettes</option>
+                      <option value="promo">Promotions</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="admin-product-list" data-admin-product-list></div>
+                <nav class="products-pagination admin-products-pagination" data-admin-products-pagination aria-label="Pagination des produits admin"></nav>
+              </section>
+            </section>
+
+            <section class="admin-section" data-admin-section="add-product" hidden>
+              <section class="admin-card">
+                <div class="admin-card-header">
+                  <div>
+                    <h2 data-form-title>Ajouter un produit</h2>
+                    <p>Completez la fiche produit, les prix, disponibilites et images.</p>
+                  </div>
+                  <button class="text-btn" type="button" data-cancel-edit hidden>Annuler</button>
+                </div>
+
+                <form class="admin-form" data-product-form>
+                  <div class="form-grid two">
+                    <label class="field-label">
+                      <span>Nom</span>
+                      <input id="product-name" type="text" name="name" required maxlength="140" />
+                    </label>
+                    <label class="field-label">
+                      <span>Slug</span>
+                      <input id="product-slug" type="text" name="slug" required maxlength="160" />
+                    </label>
+                  </div>
+
+                  <label class="field-label">
+                    <span>Description courte</span>
+                    <input type="text" name="short_description" maxlength="220" />
+                  </label>
+
+                  <label class="field-label">
+                    <span>Description longue</span>
+                    <textarea name="description" rows="5"></textarea>
+                  </label>
+
+                  <div class="form-grid two">
+                    <label class="field-label">
+                      <span>Prix</span>
+                      <input type="text" name="price" inputmode="numeric" placeholder="Ex: 15000 ou 15 000" required />
+                    </label>
+                    <label class="field-label">
+                      <span>Ancien prix</span>
+                      <input type="text" name="old_price" inputmode="numeric" placeholder="Optionnel" />
+                    </label>
+                  </div>
+
+                  <div class="form-grid two">
+                    <label class="field-label">
+                      <span>Categorie</span>
+                      <select name="category" data-category-options required></select>
+                    </label>
+                    <label class="field-label">
+                      <span>Sous-categorie</span>
+                      <input type="text" name="subcategory" placeholder="Homme, Femme, Enfant..." />
+                    </label>
+                  </div>
+
+                  <div class="form-grid two">
+                    <label class="field-label">
+                      <span>Tailles disponibles</span>
+                      <input type="text" name="sizes" placeholder="S, M, L, XL" />
+                    </label>
+                    <label class="field-label">
+                      <span>Couleurs disponibles</span>
+                      <input type="text" name="colors" placeholder="Rouge, Blanc, Bleu" />
+                    </label>
+                  </div>
+
+                  <div class="admin-gallery-panel">
+                    <div class="admin-gallery-head">
+                      <span>Images produit</span>
+                      <small>3 images maximum, la premiere devient l'image principale.</small>
+                    </div>
+                    <div class="admin-image-url-grid">
+                      <label class="field-label">
+                        <span>Image 1 par URL</span>
+                        <input type="url" name="image_url_1" data-image-url placeholder="https://..." />
+                      </label>
+                      <label class="field-label">
+                        <span>Image 2 par URL</span>
+                        <input type="url" name="image_url_2" data-image-url placeholder="https://..." />
+                      </label>
+                      <label class="field-label">
+                        <span>Image 3 par URL</span>
+                        <input type="url" name="image_url_3" data-image-url placeholder="https://..." />
+                      </label>
+                    </div>
+
+                    <label class="field-label">
+                      <span>Uploader des images</span>
+                      <input id="product-images" type="file" name="images" accept="image/*" multiple data-image-upload />
+                      <small class="field-help">Vous pouvez melanger URLs et uploads, mais seules 3 images seront enregistrees.</small>
+                    </label>
+
+                    <div class="admin-images-preview" data-images-preview></div>
+                  </div>
+
+                  <div class="checkbox-grid">
+                    <label><input type="checkbox" name="is_available" checked /> Disponible</label>
+                    <label><input type="checkbox" name="is_featured" /> Vedette</label>
+                    <label><input type="checkbox" name="is_promo" /> Promotion</label>
+                  </div>
+
+                  <button class="btn btn-primary btn-full" type="submit">
+                    <i class="fa-solid fa-floppy-disk"></i><span>Enregistrer le produit</span>
+                  </button>
+                </form>
+              </section>
+            </section>
+
+            <section class="admin-section" data-admin-section="categories" hidden>
+              <section class="admin-card category-admin-card">
+                <div class="admin-card-header">
+                  <div>
+                    <h2>Categories</h2>
+                    <p>Vue organisee des univers, disponibilites et promotions par categorie.</p>
+                  </div>
+                </div>
+                <div class="admin-category-metrics admin-category-management" data-admin-category-management></div>
+              </section>
+            </section>
+
+            <section class="admin-section" data-admin-section="gallery" hidden>
+              <section class="admin-card category-admin-card">
+                <div class="admin-card-header">
+                  <div>
+                    <h2>Galerie / Images</h2>
+                    <p>Changez les photos visibles dans Acheter par univers et dans le menu mobile.</p>
+                  </div>
+                </div>
+                <div class="admin-category-image-list" data-category-image-list></div>
+              </section>
+            </section>
+
+            <section class="admin-section" data-admin-section="promotions" hidden>
+              <section class="admin-card">
+                <div class="admin-card-header">
+                  <div>
+                    <h2>Promotions</h2>
+                    <p>Produits actuellement marques comme promotions dans le catalogue.</p>
+                  </div>
+                  <button class="btn btn-outline btn-sm" type="button" data-admin-open-products-promo>
+                    <i class="fa-solid fa-filter"></i><span>Filtrer dans Produits</span>
+                  </button>
+                </div>
+                <div class="admin-product-list" data-admin-promo-list></div>
+              </section>
+            </section>
+
+            <section class="admin-section" data-admin-section="orders" hidden>
+              <section class="admin-card">
+                <div class="admin-card-header">
+                  <div>
+                    <h2>Commandes WhatsApp</h2>
+                    <p>Les commandes publiques partent vers le numero configure dans la boutique.</p>
+                  </div>
+                  <a class="btn btn-primary btn-sm" data-admin-whatsapp-link href="#" target="_blank" rel="noopener">
+                    <i class="fa-brands fa-whatsapp"></i><span>Ouvrir WhatsApp</span>
+                  </a>
+                </div>
+                <div class="admin-settings-grid">
+                  <article class="admin-setting-card">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <span>Numero principal</span>
+                    <strong data-admin-config="whatsapp">-</strong>
+                  </article>
+                  <article class="admin-setting-card">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span>Mode commande</span>
+                    <strong>Panier local + WhatsApp</strong>
+                  </article>
+                  <article class="admin-setting-card">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Backend</span>
+                    <strong>Aucune table commande ajoutee</strong>
+                  </article>
+                </div>
+              </section>
+            </section>
+
+            <section class="admin-section" data-admin-section="settings" hidden>
+              <section class="admin-card">
+                <div class="admin-card-header">
+                  <div>
+                    <h2>Parametres boutique</h2>
+                    <p>Lecture rapide de la configuration publique utilisee par le site.</p>
+                  </div>
+                </div>
+                <div class="admin-settings-grid">
+                  <article class="admin-setting-card">
+                    <i class="fa-solid fa-store"></i>
+                    <span>Nom boutique</span>
+                    <strong data-admin-config="store">Maison Max</strong>
+                  </article>
+                  <article class="admin-setting-card">
+                    <i class="fa-solid fa-globe"></i>
+                    <span>Site</span>
+                    <strong data-admin-config="site">-</strong>
+                  </article>
+                  <article class="admin-setting-card">
+                    <i class="fa-solid fa-coins"></i>
+                    <span>Devise</span>
+                    <strong data-admin-config="currency">FCFA</strong>
+                  </article>
+                  <article class="admin-setting-card">
+                    <i class="fa-solid fa-database"></i>
+                    <span>Supabase</span>
+                    <strong data-admin-config="supabase">Connecte</strong>
+                  </article>
+                  <article class="admin-setting-card">
+                    <i class="fa-solid fa-image"></i>
+                    <span>Bucket images</span>
+                    <strong data-admin-config="bucket">product-images</strong>
+                  </article>
+                  <article class="admin-setting-card">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span>Ville par defaut</span>
+                    <strong data-admin-config="city">Dakar</strong>
+                  </article>
+                </div>
+              </section>
             </section>
           </div>
-        </div>
-
-        <div class="admin-grid">
-          <section class="admin-card">
-            <div class="admin-card-header">
-              <h2 data-form-title>Ajouter un produit</h2>
-              <button class="text-btn" type="button" data-cancel-edit hidden>Annuler</button>
-            </div>
-
-            <form class="admin-form" data-product-form>
-              <div class="form-grid two">
-                <label class="field-label">
-                  <span>Nom</span>
-                  <input id="product-name" type="text" name="name" required maxlength="140" />
-                </label>
-                <label class="field-label">
-                  <span>Slug</span>
-                  <input id="product-slug" type="text" name="slug" required maxlength="160" />
-                </label>
-              </div>
-
-              <label class="field-label">
-                <span>Description courte</span>
-                <input type="text" name="short_description" maxlength="220" />
-              </label>
-
-              <label class="field-label">
-                <span>Description longue</span>
-                <textarea name="description" rows="5"></textarea>
-              </label>
-
-              <div class="form-grid two">
-                <label class="field-label">
-                  <span>Prix</span>
-                  <input type="text" name="price" inputmode="numeric" placeholder="Ex: 15000 ou 15 000" required />
-                </label>
-                <label class="field-label">
-                  <span>Ancien prix</span>
-                  <input type="text" name="old_price" inputmode="numeric" placeholder="Optionnel" />
-                </label>
-              </div>
-
-              <div class="form-grid two">
-                <label class="field-label">
-                  <span>Categorie</span>
-                  <select name="category" data-category-options required></select>
-                </label>
-                <label class="field-label">
-                  <span>Sous-categorie</span>
-                  <input type="text" name="subcategory" placeholder="Homme, Femme, Enfant..." />
-                </label>
-              </div>
-
-              <div class="form-grid two">
-                <label class="field-label">
-                  <span>Tailles disponibles</span>
-                  <input type="text" name="sizes" placeholder="S, M, L, XL" />
-                </label>
-                <label class="field-label">
-                  <span>Couleurs disponibles</span>
-                  <input type="text" name="colors" placeholder="Rouge, Blanc, Bleu" />
-                </label>
-              </div>
-
-              <div class="admin-gallery-panel">
-                <div class="admin-gallery-head">
-                  <span>Images produit</span>
-                  <small>3 images maximum, la premiere devient l'image principale.</small>
-                </div>
-                <div class="admin-image-url-grid">
-                  <label class="field-label">
-                    <span>Image 1 par URL</span>
-                    <input type="url" name="image_url_1" data-image-url placeholder="https://..." />
-                  </label>
-                  <label class="field-label">
-                    <span>Image 2 par URL</span>
-                    <input type="url" name="image_url_2" data-image-url placeholder="https://..." />
-                  </label>
-                  <label class="field-label">
-                    <span>Image 3 par URL</span>
-                    <input type="url" name="image_url_3" data-image-url placeholder="https://..." />
-                  </label>
-                </div>
-
-                <label class="field-label">
-                  <span>Uploader des images</span>
-                  <input id="product-images" type="file" name="images" accept="image/*" multiple data-image-upload />
-                  <small class="field-help">Vous pouvez melanger URLs et uploads, mais seules 3 images seront enregistrees.</small>
-                </label>
-
-                <div class="admin-images-preview" data-images-preview></div>
-              </div>
-
-              <div class="checkbox-grid">
-                <label><input type="checkbox" name="is_available" checked /> Disponible</label>
-                <label><input type="checkbox" name="is_featured" /> Vedette</label>
-                <label><input type="checkbox" name="is_promo" /> Promotion</label>
-              </div>
-
-              <button class="btn btn-primary btn-full" type="submit">
-                <i class="fa-solid fa-floppy-disk"></i><span>Enregistrer le produit</span>
-              </button>
-            </form>
-          </section>
-
-          <section class="admin-card product-admin-card">
-            <div class="admin-card-header">
-              <h2>Liste des produits</h2>
-            </div>
-
-            <div class="admin-filters">
-              <label class="field-label">
-                <span>Recherche</span>
-                <input type="search" data-admin-search placeholder="Nom, slug, categorie..." />
-              </label>
-              <label class="field-label">
-                <span>Categorie</span>
-                <select data-admin-category data-category-options="filter"></select>
-              </label>
-              <label class="field-label">
-                <span>Statut</span>
-                <select data-admin-status>
-                  <option value="all">Tous</option>
-                  <option value="available">Disponibles</option>
-                  <option value="unavailable">Rupture</option>
-                  <option value="featured">Vedettes</option>
-                  <option value="promo">Promotions</option>
-                </select>
-              </label>
-            </div>
-
-            <div class="admin-product-list" data-admin-product-list></div>
-            <nav class="products-pagination admin-products-pagination" data-admin-products-pagination aria-label="Pagination des produits admin"></nav>
-          </section>
-
-          <section class="admin-card category-admin-card">
-            <div class="admin-card-header">
-              <div>
-                <h2>Images des categories</h2>
-                <p>Changez les photos visibles dans “Acheter par univers” et dans le menu mobile.</p>
-              </div>
-            </div>
-            <div class="admin-category-image-list" data-category-image-list></div>
-          </section>
         </div>
       </section>
     </main>
@@ -317,6 +476,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/supabase.js"></script>

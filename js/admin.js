@@ -41,10 +41,55 @@
     ready: false,
     previewObjectUrls: [],
     productsPage: 1,
-    categoryImages: {}
+    categoryImages: {},
+    activeSection: "dashboard",
+    dashboardCharts: {}
   };
 
   const elements = {};
+
+  const sectionMeta = {
+    dashboard: {
+      title: "Tableau de bord",
+      kicker: "Vue d'ensemble",
+      subtitle: "Suivi clair du catalogue Maison Max, des promotions et de la disponibilite."
+    },
+    products: {
+      title: "Produits",
+      kicker: "Catalogue",
+      subtitle: "Recherchez, filtrez et pilotez les fiches produits de la boutique."
+    },
+    "add-product": {
+      title: "Ajouter un produit",
+      kicker: "Catalogue",
+      subtitle: "Creez une fiche complete avec prix, disponibilites, tailles, couleurs et images."
+    },
+    categories: {
+      title: "Categories",
+      kicker: "Organisation",
+      subtitle: "Analysez les univers Maison Max et leur repartition catalogue."
+    },
+    promotions: {
+      title: "Promotions",
+      kicker: "Offres",
+      subtitle: "Suivez les articles marques en promotion et corrigez les offres."
+    },
+    orders: {
+      title: "Commandes WhatsApp",
+      kicker: "Commandes",
+      subtitle: "Controlez le numero et le flux de commande WhatsApp public."
+    },
+    gallery: {
+      title: "Galerie / Images",
+      kicker: "Visuels",
+      subtitle: "Gerez les images des categories visibles sur le site public."
+    },
+    settings: {
+      title: "Parametres boutique",
+      kicker: "Configuration",
+      subtitle: "Consultez les parametres publics utilises par Maison Max."
+    }
+  };
 
   const pick = () => {
     elements.setup = document.querySelector("[data-admin-setup]");
@@ -59,28 +104,128 @@
     elements.dashboardCategories = document.querySelector("[data-dashboard-categories]");
     elements.dashboardHealth = document.querySelector("[data-dashboard-health]");
     elements.dashboardRecent = document.querySelector("[data-dashboard-recent]");
+    elements.dashboardCharts = Array.from(document.querySelectorAll("[data-admin-chart]"));
+    elements.categoryManagement = document.querySelector("[data-admin-category-management]");
     elements.dashboardExport = document.querySelector("[data-admin-export-csv]");
     elements.dashboardScrollForm = document.querySelector("[data-admin-scroll-form]");
     elements.dashboardScrollProducts = document.querySelector("[data-admin-scroll-products]");
+    elements.globalSearch = document.querySelector("[data-admin-global-search]");
+    elements.quickAdd = document.querySelector("[data-admin-quick-add]");
     elements.search = document.querySelector("[data-admin-search]");
     elements.category = document.querySelector("[data-admin-category]");
     elements.status = document.querySelector("[data-admin-status]");
     elements.formTitle = document.querySelector("[data-form-title]");
     elements.cancelEdit = document.querySelector("[data-cancel-edit]");
     elements.logout = document.querySelector("[data-admin-logout]");
+    elements.logoutButtons = Array.from(document.querySelectorAll("[data-admin-logout]"));
     elements.refresh = document.querySelector("[data-admin-refresh]");
     elements.imagesPreview = document.querySelector("[data-images-preview]");
     elements.slug = document.querySelector("#product-slug");
     elements.name = document.querySelector("#product-name");
     elements.imageUpload = document.querySelector("[data-image-upload]");
     elements.imageUrlInputs = Array.from(document.querySelectorAll("[data-image-url]"));
+    elements.sections = Array.from(document.querySelectorAll("[data-admin-section]"));
+    elements.navButtons = Array.from(document.querySelectorAll("[data-admin-nav]"));
+    elements.sidebarToggle = document.querySelector("[data-admin-sidebar-toggle]");
+    elements.sidebarClose = document.querySelector("[data-admin-sidebar-close]");
+    elements.sidebarOverlay = document.querySelector("[data-admin-sidebar-overlay]");
+    elements.sectionTitle = document.querySelector("[data-admin-section-title]");
+    elements.sectionKicker = document.querySelector("[data-admin-section-kicker]");
+    elements.sectionSubtitle = document.querySelector("[data-admin-section-subtitle]");
+    elements.promoList = document.querySelector("[data-admin-promo-list]");
+    elements.openProductsPromo = document.querySelector("[data-admin-open-products-promo]");
+    elements.whatsappLink = document.querySelector("[data-admin-whatsapp-link]");
+    elements.configNodes = Array.from(document.querySelectorAll("[data-admin-config]"));
   };
 
   const showOnly = (section) => {
     [elements.setup, elements.login, elements.app].forEach((node) => {
       if (node) node.hidden = node !== section;
     });
+    document.body.classList.toggle("admin-app-active", section === elements.app);
     if (elements.logout) elements.logout.hidden = section !== elements.app;
+    if (section !== elements.app) closeAdminSidebar();
+  };
+
+  const normalizeSectionId = (sectionId) => {
+    const aliases = { whatsapp: "orders", images: "gallery", "gallery-images": "gallery" };
+    const clean = String(sectionId || "").replace(/^#/, "").trim();
+    if (aliases[clean]) return aliases[clean];
+    return sectionMeta[clean] ? clean : "dashboard";
+  };
+
+  const getSectionFromHash = () => {
+    try {
+      return normalizeSectionId(decodeURIComponent(window.location.hash.replace(/^#/, "")));
+    } catch (error) {
+      return "dashboard";
+    }
+  };
+
+  const openAdminSidebar = () => {
+    document.body.classList.add("admin-sidebar-open");
+    if (elements.sidebarToggle) elements.sidebarToggle.setAttribute("aria-expanded", "true");
+  };
+
+  const closeAdminSidebar = () => {
+    document.body.classList.remove("admin-sidebar-open");
+    if (elements.sidebarToggle) elements.sidebarToggle.setAttribute("aria-expanded", "false");
+  };
+
+  const updateConfigSummary = () => {
+    const config = window.MAISON_MAX_CONFIG || {};
+    const values = {
+      store: config.STORE_NAME || "Maison Max",
+      site: config.SITE_URL || window.location.origin,
+      currency: config.CURRENCY || "FCFA",
+      supabase: api && api.isConfigured ? "Connecte" : "Non configure",
+      bucket: config.PRODUCT_IMAGE_BUCKET || "product-images",
+      city: config.DEFAULT_CITY || "Dakar",
+      whatsapp: config.WHATSAPP_NUMBER || "Non configure"
+    };
+
+    elements.configNodes.forEach((node) => {
+      node.textContent = values[node.dataset.adminConfig] || "-";
+    });
+
+    if (elements.whatsappLink) {
+      const number = config.WHATSAPP_NUMBER || "";
+      elements.whatsappLink.href = number ? `https://wa.me/${number}` : "#";
+      elements.whatsappLink.toggleAttribute("aria-disabled", !number);
+    }
+  };
+
+  const openAdminSection = (sectionId, options = {}) => {
+    const id = normalizeSectionId(sectionId);
+    const meta = sectionMeta[id];
+
+    elements.sections.forEach((section) => {
+      section.hidden = section.dataset.adminSection !== id;
+    });
+
+    elements.navButtons.forEach((button) => {
+      const isActive = button.dataset.adminNav === id;
+      button.classList.toggle("is-active", isActive);
+      if (isActive) button.setAttribute("aria-current", "page");
+      else button.removeAttribute("aria-current");
+    });
+
+    if (elements.sectionTitle) elements.sectionTitle.textContent = meta.title;
+    if (elements.sectionKicker) elements.sectionKicker.textContent = meta.kicker;
+    if (elements.sectionSubtitle) elements.sectionSubtitle.textContent = meta.subtitle;
+    state.activeSection = id;
+
+    if (id === "dashboard") renderDashboardCharts();
+    if (id === "promotions") renderPromotions();
+    if (id === "settings" || id === "orders") updateConfigSummary();
+
+    if (options.updateHash) {
+      const hash = `#${id}`;
+      if (window.location.hash !== hash) window.location.hash = hash;
+    }
+
+    closeAdminSidebar();
+    if (options.scroll !== false) window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const fillCategorySelects = () => {
@@ -237,7 +382,8 @@
     elements.formTitle.textContent = "Modifier le produit";
     elements.cancelEdit.hidden = false;
     renderImagePreview();
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    openAdminSection("add-product", { updateHash: true });
+    elements.productForm.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const deleteProduct = async (product) => {
@@ -393,6 +539,50 @@
     renderProductsPagination(totalPages);
   };
 
+  const renderPromotions = () => {
+    const list = elements.promoList;
+    if (!list) return;
+    list.replaceChildren();
+
+    const promos = state.products.filter((product) => product.is_promo);
+    if (!promos.length) {
+      list.appendChild(
+        utils.createEl("div", {
+          className: "empty-state",
+          text: "Aucun produit en promotion pour le moment."
+        })
+      );
+      return;
+    }
+
+    promos.forEach((product) => {
+      const row = utils.createEl("article", { className: "admin-product-row" });
+      row.appendChild(
+        utils.createEl("img", {
+          attrs: { src: product.main_image || utils.fallbackImage, alt: product.name, loading: "lazy" }
+        })
+      );
+
+      const info = utils.createEl("div", { className: "admin-product-info" });
+      info.appendChild(utils.createEl("h3", { text: product.name }));
+      info.appendChild(
+        utils.createEl("p", {
+          text: `${getCategoryLabel(product.category)} - ${utils.formatPrice(product.price)}`
+        })
+      );
+      info.appendChild(createStatus(product));
+
+      const actions = utils.createEl("div", { className: "admin-row-actions" });
+      const edit = utils.createEl("button", { className: "btn btn-outline btn-sm", attrs: { type: "button" } });
+      edit.innerHTML = '<i class="fa-solid fa-pen"></i><span>Modifier</span>';
+      edit.addEventListener("click", () => editProduct(product));
+      actions.appendChild(edit);
+
+      row.append(info, actions);
+      list.appendChild(row);
+    });
+  };
+
   const applyFilters = () => {
     const term = (elements.search.value || "").toLowerCase().trim();
     const category = elements.category.value || "all";
@@ -425,10 +615,12 @@
       state.products = await api.listProductsForAdmin();
       state.filtered = [...state.products];
       applyFilters();
+      renderPromotions();
       renderDashboard();
     } catch (error) {
       state.products = [];
       state.filtered = [];
+      renderPromotions();
       renderDashboard();
       elements.productList.replaceChildren();
       elements.productList.appendChild(
@@ -519,6 +711,192 @@
     });
   };
 
+  const chartPalette = ["#164f9f", "#f6bf26", "#16a56f", "#e44834", "#7a5cff", "#00a7b5", "#ff8f3d", "#8a9bb5"];
+
+  const moneyTick = (value) => {
+    const amount = Number(value || 0);
+    if (amount >= 1000000) return `${Math.round(amount / 1000000)}M`;
+    if (amount >= 1000) return `${Math.round(amount / 1000)}k`;
+    return String(amount);
+  };
+
+  const getChartCanvas = (name) => elements.dashboardCharts.find((canvas) => canvas.dataset.adminChart === name);
+
+  const showChartFallback = (canvas, message) => {
+    if (!canvas || canvas.parentElement.querySelector(".admin-chart-fallback")) return;
+    canvas.parentElement.appendChild(utils.createEl("div", { className: "admin-chart-fallback", text: message }));
+  };
+
+  const clearChartFallback = (canvas) => {
+    const fallback = canvas?.parentElement.querySelector(".admin-chart-fallback");
+    if (fallback) fallback.remove();
+  };
+
+  const destroyDashboardCharts = () => {
+    Object.values(state.dashboardCharts).forEach((chart) => chart.destroy());
+    state.dashboardCharts = {};
+  };
+
+  const makeChart = (name, config) => {
+    const canvas = getChartCanvas(name);
+    if (!canvas) return;
+
+    if (!window.Chart) {
+      showChartFallback(canvas, "Graphique indisponible pour le moment.");
+      return;
+    }
+
+    clearChartFallback(canvas);
+    state.dashboardCharts[name] = new window.Chart(canvas, config);
+  };
+
+  const getRecentProductPeriods = () => {
+    const periods = [];
+    const now = new Date();
+    for (let index = 5; index >= 0; index -= 1) {
+      const date = new Date(now.getFullYear(), now.getMonth() - index, 1);
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      periods.push({
+        key,
+        label: date.toLocaleDateString("fr-FR", { month: "short" }).replace(".", ""),
+        total: 0
+      });
+    }
+
+    const byKey = new Map(periods.map((period) => [period.key, period]));
+    state.products.forEach((product) => {
+      const date = product.created_at ? new Date(product.created_at) : null;
+      if (!date || Number.isNaN(date.getTime())) return;
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      const period = byKey.get(key);
+      if (period) period.total += 1;
+    });
+
+    return periods;
+  };
+
+  const getCategoryValueMetrics = () => {
+    const totals = new Map(categories.map(([key, label]) => [key, { label, total: 0 }]));
+    state.products.forEach((product) => {
+      if (!totals.has(product.category)) {
+        totals.set(product.category || "sans-categorie", {
+          label: getCategoryLabel(product.category),
+          total: 0
+        });
+      }
+      totals.get(product.category || "sans-categorie").total += Number(product.price || 0);
+    });
+    return Array.from(totals.values())
+      .filter((item) => item.total > 0)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 8);
+  };
+
+  const baseChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: {
+          boxWidth: 10,
+          boxHeight: 10,
+          color: "#18243a",
+          font: { family: "Poppins", size: 12, weight: "700" }
+        }
+      },
+      tooltip: {
+        backgroundColor: "#0d3673",
+        borderColor: "rgba(255,255,255,0.18)",
+        borderWidth: 1,
+        titleFont: { family: "Poppins", weight: "800" },
+        bodyFont: { family: "Poppins", weight: "600" },
+        padding: 12
+      }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { color: "#6d7789", font: { family: "Poppins", size: 11, weight: "700" } }
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: "rgba(109, 119, 137, 0.16)" },
+        ticks: { color: "#6d7789", precision: 0, font: { family: "Poppins", size: 11, weight: "700" } }
+      }
+    }
+  };
+
+  const renderDashboardCharts = () => {
+    if (state.activeSection !== "dashboard" || !elements.dashboardCharts.length) return;
+
+    destroyDashboardCharts();
+
+    const categoryMetrics = getCategoryMetrics().filter((metric) => metric.total > 0).slice(0, 8);
+    const categoryLabels = categoryMetrics.length ? categoryMetrics.map((metric) => metric.label) : ["Aucun produit"];
+    const categoryTotals = categoryMetrics.length ? categoryMetrics.map((metric) => metric.total) : [0];
+    const summary = getDashboardSummary();
+
+    makeChart("categories", {
+      type: "bar",
+      data: {
+        labels: categoryLabels,
+        datasets: [{
+          label: "Produits",
+          data: categoryTotals,
+          backgroundColor: "#164f9f",
+          borderRadius: 8,
+          maxBarThickness: 46
+        }]
+      },
+      options: {
+        ...baseChartOptions,
+        plugins: { ...baseChartOptions.plugins, legend: { display: false } }
+      }
+    });
+
+    makeChart("availability", {
+      type: "doughnut",
+      data: {
+        labels: ["Disponibles", "Rupture"],
+        datasets: [{
+          data: [summary.available, summary.unavailable],
+          backgroundColor: ["#16a56f", "#e44834"],
+          borderColor: "#ffffff",
+          borderWidth: 4,
+          hoverOffset: 5
+        }]
+      },
+      options: {
+        ...baseChartOptions,
+        cutout: "68%",
+        scales: {}
+      }
+    });
+
+    makeChart("promotions", {
+      type: "doughnut",
+      data: {
+        labels: ["Promotions", "Vedettes", "Autres"],
+        datasets: [{
+          data: [
+            summary.promo,
+            summary.featured,
+            state.products.filter((product) => !product.is_promo && !product.is_featured).length
+          ],
+          backgroundColor: ["#f6bf26", "#164f9f", "#dfe5ef"],
+          borderColor: "#ffffff",
+          borderWidth: 4,
+          hoverOffset: 5
+        }]
+      },
+      options: {
+        ...baseChartOptions,
+        cutout: "68%",
+        scales: {}
+      }
+    });
+  };
+
   const getCategoryMetrics = () => {
     const labels = new Map(categories);
 
@@ -548,8 +926,7 @@
     return metrics.sort((a, b) => b.total - a.total || a.label.localeCompare(b.label));
   };
 
-  const renderDashboardCategories = () => {
-    const holder = elements.dashboardCategories;
+  const renderCategoryMetricList = (holder) => {
     if (!holder) return;
     holder.replaceChildren();
 
@@ -581,6 +958,14 @@
       row.appendChild(content);
       holder.appendChild(row);
     });
+  };
+
+  const renderDashboardCategories = () => {
+    renderCategoryMetricList(elements.dashboardCategories);
+  };
+
+  const renderCategoryManagement = () => {
+    renderCategoryMetricList(elements.categoryManagement);
   };
 
   const renderDashboardHealth = () => {
@@ -677,9 +1062,8 @@
 
   const renderDashboard = () => {
     renderDashboardStats();
-    renderDashboardCategories();
-    renderDashboardHealth();
-    renderDashboardRecent();
+    renderDashboardCharts();
+    renderCategoryManagement();
   };
 
   const escapeCsvValue = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
@@ -727,6 +1111,7 @@
 
   const scrollToProductForm = () => {
     resetForm();
+    openAdminSection("add-product", { updateHash: true });
     elements.productForm.scrollIntoView({ behavior: "smooth", block: "start" });
     try {
       elements.name.focus({ preventScroll: true });
@@ -736,7 +1121,28 @@
   };
 
   const scrollToProductList = () => {
+    if (elements.status) elements.status.value = "all";
+    applyFilters();
+    openAdminSection("products", { updateHash: true });
     elements.productList.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const openProductsPromotions = () => {
+    if (elements.status) elements.status.value = "promo";
+    if (elements.category) elements.category.value = "all";
+    if (elements.search) elements.search.value = "";
+    applyFilters();
+    openAdminSection("products", { updateHash: true });
+  };
+
+  const applyGlobalSearch = () => {
+    const term = String(elements.globalSearch?.value || "").trim();
+    if (!term) return;
+    if (elements.search) elements.search.value = term;
+    if (elements.category) elements.category.value = "all";
+    if (elements.status) elements.status.value = "all";
+    applyFilters();
+    openAdminSection("products", { updateHash: true });
   };
 
   const saveCategoryImagesSetting = async () => {
@@ -874,6 +1280,7 @@
         throw new Error("Ce compte n'a pas les droits vendeur.");
       }
       showOnly(elements.app);
+      openAdminSection(getSectionFromHash(), { scroll: false });
       await loadAdminData();
     } catch (error) {
       utils.toast(error.message || "Connexion impossible", "error");
@@ -917,9 +1324,36 @@
     elements.dashboardExport?.addEventListener("click", exportProductsCsv);
     elements.dashboardScrollForm?.addEventListener("click", scrollToProductForm);
     elements.dashboardScrollProducts?.addEventListener("click", scrollToProductList);
-    elements.logout.addEventListener("click", async () => {
-      await api.signOut();
-      showOnly(elements.login);
+    elements.openProductsPromo?.addEventListener("click", openProductsPromotions);
+    elements.quickAdd?.addEventListener("click", scrollToProductForm);
+    elements.globalSearch?.addEventListener("search", applyGlobalSearch);
+    elements.globalSearch?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        applyGlobalSearch();
+      }
+    });
+
+    elements.navButtons.forEach((button) => {
+      button.addEventListener("click", () => openAdminSection(button.dataset.adminNav, { updateHash: true }));
+    });
+
+    elements.sidebarToggle?.addEventListener("click", openAdminSidebar);
+    elements.sidebarClose?.addEventListener("click", closeAdminSidebar);
+    elements.sidebarOverlay?.addEventListener("click", closeAdminSidebar);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeAdminSidebar();
+    });
+    window.addEventListener("hashchange", () => {
+      if (elements.app && !elements.app.hidden) openAdminSection(getSectionFromHash(), { scroll: false });
+    });
+
+    elements.logoutButtons.forEach((button) => {
+      button.addEventListener("click", async () => {
+        await api.signOut();
+        closeAdminSidebar();
+        showOnly(elements.login);
+      });
     });
 
     [elements.search, elements.category, elements.status].forEach((input) => {
@@ -974,6 +1408,7 @@
     }
 
     showOnly(elements.app);
+    openAdminSection(getSectionFromHash(), { scroll: false });
     await loadAdminData();
   };
 
