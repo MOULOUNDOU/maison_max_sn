@@ -524,36 +524,59 @@
     return gallery.slice(0, Math.max(3, Math.min(gallery.length, 5)));
   };
 
+  const getProductSlideDuration = (product, index) => {
+    const durations = [3600, 5200, 6800, 4500, 6100];
+    const categoryIndex = Math.max(0, categoryOrder.indexOf(product.category));
+    return durations[index % durations.length] + (categoryIndex % 3) * 300;
+  };
+
+  const setProductCarouselIndex = (carousel, index) => {
+    const images = Array.from(carousel.querySelectorAll(".product-carousel-image"));
+    const dots = Array.from(carousel.querySelectorAll(".product-carousel-dots span"));
+    if (!images.length) return;
+    const nextIndex = (index + images.length) % images.length;
+    carousel.dataset.index = String(nextIndex);
+    images.forEach((image, imageIndex) => image.classList.toggle("is-active", imageIndex === nextIndex));
+    dots.forEach((dot, dotIndex) => dot.classList.toggle("is-active", dotIndex === nextIndex));
+  };
+
+  const getCurrentSlideDuration = (carousel) => {
+    const images = carousel.querySelectorAll(".product-carousel-image");
+    const index = Number(carousel.dataset.index || 0);
+    return Number(images[index]?.dataset.duration || 5000);
+  };
+
+  const scheduleProductCarousel = (carousel, timerIndex) => {
+    const images = carousel.querySelectorAll(".product-carousel-image");
+    if (images.length < 2) return;
+
+    productCarouselTimers[timerIndex] = setTimeout(() => {
+      if (!carousel.isConnected) return;
+      const currentImages = carousel.querySelectorAll(".product-carousel-image");
+      if (currentImages.length < 2) return;
+      const next = (Number(carousel.dataset.index || 0) + 1) % currentImages.length;
+      setProductCarouselIndex(carousel, next);
+      scheduleProductCarousel(carousel, timerIndex);
+    }, getCurrentSlideDuration(carousel));
+  };
+
+  const restartProductCarousel = (carousel) => {
+    const timerIndex = Number(carousel.dataset.timerIndex);
+    if (!Number.isInteger(timerIndex)) return;
+    clearTimeout(productCarouselTimers[timerIndex]);
+    scheduleProductCarousel(carousel, timerIndex);
+  };
+
   const startProductCarousels = () => {
     productCarouselTimers.forEach((t) => clearTimeout(t));
     productCarouselTimers = [];
     const carousels = Array.from(document.querySelectorAll("[data-product-carousel]"));
     if (!carousels.length) return;
 
-    const updateCarousel = (carousel, index) => {
-      const images = Array.from(carousel.querySelectorAll(".product-carousel-image"));
-      const dots = Array.from(carousel.querySelectorAll(".product-carousel-dots span"));
-      if (!images.length) return;
-      carousel.dataset.index = String(index);
-      images.forEach((image, imageIndex) => image.classList.toggle("is-active", imageIndex === index));
-      dots.forEach((dot, dotIndex) => dot.classList.toggle("is-active", dotIndex === index));
-    };
-
-    const scheduleCarousel = (carousel, i) => {
-      const images = carousel.querySelectorAll(".product-carousel-image");
-      if (images.length < 2) return;
-      const delay = 5000 + Math.random() * 4000;
-      const timerId = setTimeout(() => {
-        const next = (Number(carousel.dataset.index || 0) + 1) % images.length;
-        updateCarousel(carousel, next);
-        scheduleCarousel(carousel, i);
-      }, delay);
-      productCarouselTimers[i] = timerId;
-    };
-
     carousels.forEach((carousel, i) => {
-      updateCarousel(carousel, 0);
-      scheduleCarousel(carousel, i);
+      carousel.dataset.timerIndex = String(i);
+      setProductCarouselIndex(carousel, 0);
+      scheduleProductCarousel(carousel, i);
     });
   };
 
@@ -576,7 +599,8 @@
           attrs: {
             src,
             alt: product.name,
-            loading: "lazy"
+            loading: "lazy",
+            "data-duration": getProductSlideDuration(product, index)
           }
         })
       );
@@ -600,30 +624,11 @@
       const navigate = (dir, e) => {
         e.preventDefault();
         e.stopPropagation();
-        const imgs = productCarousel.querySelectorAll(".product-carousel-image");
-        const dots = productCarousel.querySelectorAll(".product-carousel-dots span");
-        const cur = Number(productCarousel.dataset.index || 0);
-        const next = (cur + dir + imgs.length) % imgs.length;
-        productCarousel.dataset.index = String(next);
-        imgs.forEach((img, i) => img.classList.toggle("is-active", i === next));
-        dots.forEach((dot, i) => dot.classList.toggle("is-active", i === next));
-        const idx = Array.from(document.querySelectorAll("[data-product-carousel]")).indexOf(productCarousel);
-        if (idx !== -1 && productCarouselTimers[idx]) {
-          clearTimeout(productCarouselTimers[idx]);
-          const reschedule = document.querySelectorAll("[data-product-carousel]")[idx];
-          if (reschedule) {
-            const delay = 5000 + Math.random() * 4000;
-            productCarouselTimers[idx] = setTimeout(function tick() {
-              const images = reschedule.querySelectorAll(".product-carousel-image");
-              const d = reschedule.querySelectorAll(".product-carousel-dots span");
-              const n = (Number(reschedule.dataset.index || 0) + 1) % images.length;
-              reschedule.dataset.index = String(n);
-              images.forEach((img, i) => img.classList.toggle("is-active", i === n));
-              d.forEach((dot, i) => dot.classList.toggle("is-active", i === n));
-              productCarouselTimers[idx] = setTimeout(tick, 5000 + Math.random() * 4000);
-            }, delay);
-          }
-        }
+        const images = productCarousel.querySelectorAll(".product-carousel-image");
+        if (!images.length) return;
+        const current = Number(productCarousel.dataset.index || 0);
+        setProductCarouselIndex(productCarousel, current + dir);
+        restartProductCarousel(productCarousel);
       };
       prevBtn.addEventListener("click", (e) => navigate(-1, e));
       nextBtn.addEventListener("click", (e) => navigate(1, e));
