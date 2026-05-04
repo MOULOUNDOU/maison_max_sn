@@ -57,11 +57,70 @@
         <div class="admin-title-row">
           <div>
             <span>Espace vendeur</span>
-            <h1>Gestion des produits</h1>
+            <h1>Dashboard Maison Max</h1>
           </div>
           <button class="btn btn-light" type="button" data-admin-refresh>
             <i class="fa-solid fa-rotate"></i><span>Actualiser</span>
           </button>
+        </div>
+
+        <div class="admin-dashboard" data-admin-dashboard>
+          <section class="admin-card admin-overview-card">
+            <div class="admin-card-header">
+              <div>
+                <h2>Vue generale</h2>
+                <p>Suivez rapidement l'etat du catalogue, les promotions et les produits a corriger.</p>
+              </div>
+              <span class="admin-live-pill"><i class="fa-solid fa-circle"></i> Supabase connecte</span>
+            </div>
+            <div class="admin-stats-grid" data-dashboard-stats></div>
+          </section>
+
+          <div class="admin-dashboard-grid">
+            <section class="admin-card">
+              <div class="admin-card-header">
+                <div>
+                  <h2>Categories</h2>
+                  <p>Repartition des produits par univers.</p>
+                </div>
+              </div>
+              <div class="admin-category-metrics" data-dashboard-categories></div>
+            </section>
+
+            <section class="admin-card">
+              <div class="admin-card-header">
+                <div>
+                  <h2>Actions rapides</h2>
+                  <p>Raccourcis utiles pour piloter la boutique.</p>
+                </div>
+              </div>
+              <div class="admin-quick-actions">
+                <button class="btn btn-primary btn-sm" type="button" data-admin-scroll-form>
+                  <i class="fa-solid fa-plus"></i><span>Ajouter</span>
+                </button>
+                <button class="btn btn-light btn-sm" type="button" data-admin-scroll-products>
+                  <i class="fa-solid fa-list-check"></i><span>Produits</span>
+                </button>
+                <button class="btn btn-outline btn-sm" type="button" data-admin-export-csv>
+                  <i class="fa-solid fa-file-arrow-down"></i><span>Export CSV</span>
+                </button>
+                <a class="btn btn-light btn-sm" href="boutique.html#catalogue">
+                  <i class="fa-solid fa-shop"></i><span>Boutique</span>
+                </a>
+              </div>
+              <div class="admin-health-list" data-dashboard-health></div>
+            </section>
+
+            <section class="admin-card">
+              <div class="admin-card-header">
+                <div>
+                  <h2>Derniers produits</h2>
+                  <p>Les ajouts et modifications les plus recents.</p>
+                </div>
+              </div>
+              <div class="admin-recent-list" data-dashboard-recent></div>
+            </section>
+          </div>
         </div>
 
         <div class="admin-grid">

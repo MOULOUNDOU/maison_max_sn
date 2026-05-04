@@ -55,6 +55,13 @@
     elements.productList = document.querySelector("[data-admin-product-list]");
     elements.productPagination = document.querySelector("[data-admin-products-pagination]");
     elements.categoryImageList = document.querySelector("[data-category-image-list]");
+    elements.dashboardStats = document.querySelector("[data-dashboard-stats]");
+    elements.dashboardCategories = document.querySelector("[data-dashboard-categories]");
+    elements.dashboardHealth = document.querySelector("[data-dashboard-health]");
+    elements.dashboardRecent = document.querySelector("[data-dashboard-recent]");
+    elements.dashboardExport = document.querySelector("[data-admin-export-csv]");
+    elements.dashboardScrollForm = document.querySelector("[data-admin-scroll-form]");
+    elements.dashboardScrollProducts = document.querySelector("[data-admin-scroll-products]");
     elements.search = document.querySelector("[data-admin-search]");
     elements.category = document.querySelector("[data-admin-category]");
     elements.status = document.querySelector("[data-admin-status]");
@@ -88,6 +95,11 @@
       });
       if (current) select.value = current;
     });
+  };
+
+  const getCategoryLabel = (key) => {
+    const found = categories.find(([value]) => value === key);
+    return found ? found[1] : key || "Sans categorie";
   };
 
   const validatePayload = (payload) => {
@@ -413,7 +425,11 @@
       state.products = await api.listProductsForAdmin();
       state.filtered = [...state.products];
       applyFilters();
+      renderDashboard();
     } catch (error) {
+      state.products = [];
+      state.filtered = [];
+      renderDashboard();
       elements.productList.replaceChildren();
       elements.productList.appendChild(
         utils.createEl("div", {
@@ -425,6 +441,303 @@
   };
 
   const getCategoryImage = (key) => state.categoryImages[key] || categoryDefaultImages[key] || utils.fallbackImage;
+
+  const productHasRealImage = (product) => {
+    const images = utils.unique([product.main_image, ...(product.images || [])]);
+    return images.some((src) => src && src !== utils.fallbackImage);
+  };
+
+  const getDashboardSummary = () => {
+    const total = state.products.length;
+    const available = state.products.filter((product) => product.is_available).length;
+    const unavailable = total - available;
+    const featured = state.products.filter((product) => product.is_featured).length;
+    const promo = state.products.filter((product) => product.is_promo).length;
+    const value = state.products.reduce((sum, product) => sum + Number(product.price || 0), 0);
+
+    return { total, available, unavailable, featured, promo, value };
+  };
+
+  const renderDashboardStats = () => {
+    const holder = elements.dashboardStats;
+    if (!holder) return;
+    holder.replaceChildren();
+
+    const summary = getDashboardSummary();
+    const stats = [
+      {
+        icon: "fa-boxes-stacked",
+        label: "Produits",
+        value: summary.total,
+        detail: "fiches catalogue"
+      },
+      {
+        icon: "fa-circle-check",
+        label: "Disponibles",
+        value: summary.available,
+        detail: "visibles sur le site",
+        tone: "success"
+      },
+      {
+        icon: "fa-triangle-exclamation",
+        label: "Rupture",
+        value: summary.unavailable,
+        detail: "a remettre a jour",
+        tone: summary.unavailable ? "warning" : "success"
+      },
+      {
+        icon: "fa-bolt",
+        label: "Promotions",
+        value: summary.promo,
+        detail: "offres actives",
+        tone: "promo"
+      },
+      {
+        icon: "fa-star",
+        label: "Vedettes",
+        value: summary.featured,
+        detail: "mis en avant",
+        tone: "featured"
+      },
+      {
+        icon: "fa-wallet",
+        label: "Valeur catalogue",
+        value: utils.formatPrice(summary.value),
+        detail: "prix cumules"
+      }
+    ];
+
+    stats.forEach((stat) => {
+      const card = utils.createEl("article", { className: `admin-stat-card ${stat.tone || ""}` });
+      card.appendChild(utils.createEl("i", { className: `fa-solid ${stat.icon}` }));
+      const content = utils.createEl("div");
+      content.appendChild(utils.createEl("span", { text: stat.label }));
+      content.appendChild(utils.createEl("strong", { text: stat.value }));
+      content.appendChild(utils.createEl("small", { text: stat.detail }));
+      card.appendChild(content);
+      holder.appendChild(card);
+    });
+  };
+
+  const getCategoryMetrics = () => {
+    const labels = new Map(categories);
+
+    state.products.forEach((product) => {
+      if (product.category && !labels.has(product.category)) {
+        labels.set(product.category, getCategoryLabel(product.category));
+      }
+    });
+
+    const metrics = Array.from(labels, ([key, label]) => ({
+      key,
+      label,
+      total: 0,
+      available: 0,
+      promo: 0
+    }));
+    const byKey = new Map(metrics.map((item) => [item.key, item]));
+
+    state.products.forEach((product) => {
+      const metric = byKey.get(product.category);
+      if (!metric) return;
+      metric.total += 1;
+      if (product.is_available) metric.available += 1;
+      if (product.is_promo) metric.promo += 1;
+    });
+
+    return metrics.sort((a, b) => b.total - a.total || a.label.localeCompare(b.label));
+  };
+
+  const renderDashboardCategories = () => {
+    const holder = elements.dashboardCategories;
+    if (!holder) return;
+    holder.replaceChildren();
+
+    const metrics = getCategoryMetrics();
+    const max = Math.max(1, ...metrics.map((item) => item.total));
+
+    metrics.forEach((metric) => {
+      const row = utils.createEl("article", { className: "admin-category-metric" });
+      row.appendChild(
+        utils.createEl("img", {
+          attrs: { src: getCategoryImage(metric.key), alt: metric.label, loading: "lazy" }
+        })
+      );
+
+      const content = utils.createEl("div", { className: "admin-category-metric-content" });
+      const top = utils.createEl("div", { className: "admin-category-metric-top" });
+      top.appendChild(utils.createEl("strong", { text: metric.label }));
+      top.appendChild(utils.createEl("span", { text: `${metric.total} produit${metric.total > 1 ? "s" : ""}` }));
+
+      const meta = utils.createEl("p", {
+        text: `${metric.available} disponible${metric.available > 1 ? "s" : ""} · ${metric.promo} promo${metric.promo > 1 ? "s" : ""}`
+      });
+      const bar = utils.createEl("div", { className: "admin-metric-bar" });
+      const fill = utils.createEl("span");
+      fill.style.width = metric.total ? `${Math.max(8, Math.round((metric.total / max) * 100))}%` : "0%";
+      bar.appendChild(fill);
+
+      content.append(top, meta, bar);
+      row.appendChild(content);
+      holder.appendChild(row);
+    });
+  };
+
+  const renderDashboardHealth = () => {
+    const holder = elements.dashboardHealth;
+    if (!holder) return;
+    holder.replaceChildren();
+
+    const missingImages = state.products.filter((product) => !productHasRealImage(product));
+    const missingDescriptions = state.products.filter(
+      (product) => !String(product.short_description || product.description || "").trim()
+    );
+    const promoWithoutOldPrice = state.products.filter(
+      (product) => product.is_promo && (!product.old_price || Number(product.old_price) <= Number(product.price))
+    );
+    const unavailable = state.products.filter((product) => !product.is_available);
+
+    const items = [
+      {
+        icon: "fa-image",
+        label: "Images",
+        value: missingImages.length,
+        text: missingImages.length ? "produits sans vraie photo" : "toutes les fiches ont une photo",
+        tone: missingImages.length ? "warning" : "success"
+      },
+      {
+        icon: "fa-align-left",
+        label: "Descriptions",
+        value: missingDescriptions.length,
+        text: missingDescriptions.length ? "descriptions a completer" : "descriptions renseignees",
+        tone: missingDescriptions.length ? "warning" : "success"
+      },
+      {
+        icon: "fa-tag",
+        label: "Promotions",
+        value: promoWithoutOldPrice.length,
+        text: promoWithoutOldPrice.length ? "promos sans ancien prix clair" : "promotions coherentes",
+        tone: promoWithoutOldPrice.length ? "warning" : "success"
+      },
+      {
+        icon: "fa-eye-slash",
+        label: "Ruptures",
+        value: unavailable.length,
+        text: unavailable.length ? "produits desactives" : "catalogue visible",
+        tone: unavailable.length ? "neutral" : "success"
+      }
+    ];
+
+    items.forEach((item) => {
+      const row = utils.createEl("article", { className: `admin-health-item ${item.tone}` });
+      row.appendChild(utils.createEl("i", { className: `fa-solid ${item.icon}` }));
+      const content = utils.createEl("div");
+      content.appendChild(utils.createEl("strong", { text: item.label }));
+      content.appendChild(utils.createEl("span", { text: `${item.value} ${item.text}` }));
+      row.appendChild(content);
+      holder.appendChild(row);
+    });
+  };
+
+  const renderDashboardRecent = () => {
+    const holder = elements.dashboardRecent;
+    if (!holder) return;
+    holder.replaceChildren();
+
+    const recent = [...state.products]
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 5);
+
+    if (!recent.length) {
+      holder.appendChild(utils.createEl("div", { className: "empty-state", text: "Aucun produit pour le moment." }));
+      return;
+    }
+
+    recent.forEach((product) => {
+      const row = utils.createEl("article", { className: "admin-recent-item" });
+      row.appendChild(
+        utils.createEl("img", {
+          attrs: { src: product.main_image || utils.fallbackImage, alt: product.name, loading: "lazy" }
+        })
+      );
+
+      const content = utils.createEl("div");
+      content.appendChild(utils.createEl("strong", { text: product.name }));
+      content.appendChild(utils.createEl("span", { text: `${getCategoryLabel(product.category)} · ${utils.formatPrice(product.price)}` }));
+      row.appendChild(content);
+      row.appendChild(
+        utils.createEl("span", {
+          className: product.is_available ? "status-pill success" : "status-pill danger",
+          text: product.is_available ? "Dispo" : "Rupture"
+        })
+      );
+      holder.appendChild(row);
+    });
+  };
+
+  const renderDashboard = () => {
+    renderDashboardStats();
+    renderDashboardCategories();
+    renderDashboardHealth();
+    renderDashboardRecent();
+  };
+
+  const escapeCsvValue = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
+
+  const exportProductsCsv = () => {
+    if (!state.products.length) {
+      utils.toast("Aucun produit a exporter.", "error");
+      return;
+    }
+
+    const headers = [
+      "Nom",
+      "Slug",
+      "Categorie",
+      "Sous-categorie",
+      "Prix",
+      "Ancien prix",
+      "Disponible",
+      "Vedette",
+      "Promotion",
+      "Images"
+    ];
+    const rows = state.products.map((product) => [
+      product.name,
+      product.slug,
+      getCategoryLabel(product.category),
+      product.subcategory,
+      product.price,
+      product.old_price || "",
+      product.is_available ? "Oui" : "Non",
+      product.is_featured ? "Oui" : "Non",
+      product.is_promo ? "Oui" : "Non",
+      utils.unique([product.main_image, ...(product.images || [])]).join(" | ")
+    ]);
+    const csv = [headers, ...rows].map((row) => row.map(escapeCsvValue).join(",")).join("\n");
+    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `maison-max-produits-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    utils.toast("Export CSV telecharge");
+  };
+
+  const scrollToProductForm = () => {
+    resetForm();
+    elements.productForm.scrollIntoView({ behavior: "smooth", block: "start" });
+    try {
+      elements.name.focus({ preventScroll: true });
+    } catch (error) {
+      elements.name.focus();
+    }
+  };
+
+  const scrollToProductList = () => {
+    elements.productList.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const saveCategoryImagesSetting = async () => {
     await api.setSiteSetting("category_images", state.categoryImages);
@@ -538,6 +851,12 @@
     }
 
     renderCategoryImages();
+    renderDashboard();
+  };
+
+  const loadAdminData = async () => {
+    await Promise.all([loadProducts(), loadCategoryImages()]);
+    renderDashboard();
   };
 
   const handleLogin = async (event) => {
@@ -555,7 +874,7 @@
         throw new Error("Ce compte n'a pas les droits vendeur.");
       }
       showOnly(elements.app);
-      await Promise.all([loadProducts(), loadCategoryImages()]);
+      await loadAdminData();
     } catch (error) {
       utils.toast(error.message || "Connexion impossible", "error");
     } finally {
@@ -594,7 +913,10 @@
     elements.loginForm.addEventListener("submit", handleLogin);
     elements.productForm.addEventListener("submit", handleProductSubmit);
     elements.cancelEdit.addEventListener("click", resetForm);
-    elements.refresh.addEventListener("click", loadProducts);
+    elements.refresh.addEventListener("click", loadAdminData);
+    elements.dashboardExport?.addEventListener("click", exportProductsCsv);
+    elements.dashboardScrollForm?.addEventListener("click", scrollToProductForm);
+    elements.dashboardScrollProducts?.addEventListener("click", scrollToProductList);
     elements.logout.addEventListener("click", async () => {
       await api.signOut();
       showOnly(elements.login);
@@ -652,7 +974,7 @@
     }
 
     showOnly(elements.app);
-    await Promise.all([loadProducts(), loadCategoryImages()]);
+    await loadAdminData();
   };
 
   document.addEventListener("DOMContentLoaded", init);
