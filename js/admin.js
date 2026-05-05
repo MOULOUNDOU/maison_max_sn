@@ -711,7 +711,7 @@
     });
   };
 
-  const chartPalette = ["#164f9f", "#f6bf26", "#16a56f", "#e44834", "#7a5cff", "#00a7b5", "#ff8f3d", "#8a9bb5"];
+  const chartPalette = ["#6B4F3A", "#E8DCCB", "#16a56f", "#e44834", "#A88768", "#8F735B", "#C28B62", "#B7A48F"];
 
   const moneyTick = (value) => {
     const amount = Number(value || 0);
@@ -800,12 +800,12 @@
         labels: {
           boxWidth: 10,
           boxHeight: 10,
-          color: "#18243a",
+          color: "#2E241D",
           font: { family: "Poppins", size: 12, weight: "700" }
         }
       },
       tooltip: {
-        backgroundColor: "#0d3673",
+        backgroundColor: "#4A372A",
         borderColor: "rgba(255,255,255,0.18)",
         borderWidth: 1,
         titleFont: { family: "Poppins", weight: "800" },
@@ -816,12 +816,12 @@
     scales: {
       x: {
         grid: { display: false },
-        ticks: { color: "#6d7789", font: { family: "Poppins", size: 11, weight: "700" } }
+        ticks: { color: "#7B6A5A", font: { family: "Poppins", size: 11, weight: "700" } }
       },
       y: {
         beginAtZero: true,
-        grid: { color: "rgba(109, 119, 137, 0.16)" },
-        ticks: { color: "#6d7789", precision: 0, font: { family: "Poppins", size: 11, weight: "700" } }
+        grid: { color: "rgba(123, 106, 90, 0.16)" },
+        ticks: { color: "#7B6A5A", precision: 0, font: { family: "Poppins", size: 11, weight: "700" } }
       }
     }
   };
@@ -843,7 +843,7 @@
         datasets: [{
           label: "Produits",
           data: categoryTotals,
-          backgroundColor: "#164f9f",
+          backgroundColor: "#6B4F3A",
           borderRadius: 8,
           maxBarThickness: 46
         }]
@@ -861,7 +861,7 @@
         datasets: [{
           data: [summary.available, summary.unavailable],
           backgroundColor: ["#16a56f", "#e44834"],
-          borderColor: "#ffffff",
+          borderColor: "#FFFFFF",
           borderWidth: 4,
           hoverOffset: 5
         }]
@@ -883,8 +883,8 @@
             summary.featured,
             state.products.filter((product) => !product.is_promo && !product.is_featured).length
           ],
-          backgroundColor: ["#f6bf26", "#164f9f", "#dfe5ef"],
-          borderColor: "#ffffff",
+          backgroundColor: ["#B99B78", "#6B4F3A", "#D2BEA6"],
+          borderColor: "#FFFFFF",
           borderWidth: 4,
           hoverOffset: 5
         }]
