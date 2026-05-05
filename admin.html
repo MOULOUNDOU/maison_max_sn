@@ -2,13 +2,13 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <title>Espace vendeur | Maison Max</title>
     <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" href="assets/logo-maison-max.jpg" type="image/jpeg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
@@ -37,22 +37,35 @@
 
       <section class="container admin-login-panel" data-admin-login hidden>
         <div class="login-card">
-          <img src="assets/logo-maison-max.jpg" alt="Maison Max" width="140" height="110" />
-          <h1>Connexion vendeur</h1>
-          <p>Acces reserve a l'administration des produits Maison Max.</p>
-          <form data-login-form>
-            <label class="field-label">
-              <span>Email</span>
-              <input type="email" name="email" autocomplete="email" required />
-            </label>
-            <label class="field-label">
-              <span>Mot de passe</span>
-              <input type="password" name="password" autocomplete="current-password" required />
-            </label>
-            <button class="btn btn-primary btn-full" type="submit">
-              <i class="fa-solid fa-lock"></i><span>Se connecter</span>
-            </button>
-          </form>
+          <div class="login-visual">
+            <img src="assets/logo-maison-max.jpg" alt="Maison Max" width="420" height="520" />
+          </div>
+          <div class="login-content">
+            <h1>Connexion vendeur</h1>
+            <p>Acces reserve a l'administration des produits Maison Max.</p>
+            <form data-login-form>
+              <label class="field-label">
+                <span>Email</span>
+                <span class="input-icon-field">
+                  <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+                  <input type="email" name="email" autocomplete="email" required />
+                </span>
+              </label>
+              <label class="field-label">
+                <span>Mot de passe</span>
+                <span class="input-icon-field password-field">
+                  <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                  <input type="password" name="password" autocomplete="current-password" required data-password-input />
+                  <button class="password-toggle" type="button" data-password-toggle aria-label="Afficher le mot de passe">
+                    <i class="fa-regular fa-eye"></i>
+                  </button>
+                </span>
+              </label>
+              <button class="btn btn-primary btn-full" type="submit">
+                <i class="fa-solid fa-lock"></i><span>Se connecter</span>
+              </button>
+            </form>
+          </div>
         </div>
       </section>
 
@@ -110,7 +123,6 @@
                 <input type="search" data-admin-global-search placeholder="Rechercher un produit..." />
               </label>
               <div class="admin-top-actions">
-                <span class="admin-live-pill"><i class="fa-solid fa-circle"></i> Supabase connecte</span>
                 <button class="btn btn-primary btn-sm" type="button" data-admin-quick-add>
                   <i class="fa-solid fa-plus"></i><span>Ajouter</span>
                 </button>
@@ -386,9 +398,56 @@
                 <div class="admin-card-header">
                   <div>
                     <h2>Parametres boutique</h2>
-                    <p>Lecture rapide de la configuration publique utilisee par le site.</p>
+                    <p>Personnalisez l'apparence appliquee au dashboard et au site public.</p>
                   </div>
                 </div>
+                <form class="admin-theme-form" data-admin-theme-form>
+                  <div class="admin-theme-grid">
+                    <label class="field-label theme-color-field">
+                      <span>Couleur principale</span>
+                      <input type="color" name="primary" value="#6B4F3A" />
+                    </label>
+                    <label class="field-label theme-color-field">
+                      <span>Couleur secondaire</span>
+                      <input type="color" name="secondary" value="#F5EFE6" />
+                    </label>
+                    <label class="field-label theme-color-field">
+                      <span>Couleur boutons</span>
+                      <input type="color" name="button" value="#4A372A" />
+                    </label>
+                    <label class="field-label">
+                      <span>Police</span>
+                      <select name="font">
+                        <option value="Manrope">Manrope</option>
+                        <option value="Inter">Inter</option>
+                        <option value="Poppins">Poppins</option>
+                        <option value="Roboto">Roboto</option>
+                        <option value="Open Sans">Open Sans</option>
+                      </select>
+                    </label>
+                    <label class="field-label">
+                      <span>Taille du texte</span>
+                      <select name="textSize">
+                        <option value="small">Petit</option>
+                        <option value="normal">Normal</option>
+                        <option value="large">Grand</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="admin-theme-preview" aria-label="Apercu du theme">
+                    <span data-theme-preview="primary"></span>
+                    <span data-theme-preview="secondary"></span>
+                    <span data-theme-preview="button"></span>
+                  </div>
+                  <div class="admin-form-actions">
+                    <button class="btn btn-primary btn-sm" type="submit">
+                      <i class="fa-solid fa-floppy-disk"></i><span>Enregistrer</span>
+                    </button>
+                    <button class="btn btn-light btn-sm" type="button" data-admin-theme-reset>
+                      <i class="fa-solid fa-rotate-left"></i><span>Theme par defaut</span>
+                    </button>
+                  </div>
+                </form>
                 <div class="admin-settings-grid">
                   <article class="admin-setting-card">
                     <i class="fa-solid fa-store"></i>

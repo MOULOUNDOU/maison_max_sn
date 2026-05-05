@@ -4,6 +4,56 @@
   const fallbackImage =
     "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=900&q=80";
 
+  const themeStorageKey = "maison_max_theme";
+  const defaultTheme = {
+    primary: "#6B4F3A",
+    secondary: "#F5EFE6",
+    button: "#4A372A",
+    font: "Manrope",
+    textSize: "normal"
+  };
+
+  const isHexColor = (value) => /^#[0-9a-f]{6}$/i.test(String(value || "").trim());
+
+  const normalizeTheme = (theme = {}) => ({
+    primary: isHexColor(theme.primary) ? theme.primary : defaultTheme.primary,
+    secondary: isHexColor(theme.secondary) ? theme.secondary : defaultTheme.secondary,
+    button: isHexColor(theme.button) ? theme.button : defaultTheme.button,
+    font: ["Inter", "Manrope", "Poppins", "Roboto", "Open Sans"].includes(theme.font) ? theme.font : defaultTheme.font,
+    textSize: ["small", "normal", "large"].includes(theme.textSize) ? theme.textSize : defaultTheme.textSize
+  });
+
+  const getStoredTheme = () => {
+    try {
+      return normalizeTheme(JSON.parse(localStorage.getItem(themeStorageKey) || "{}"));
+    } catch (error) {
+      return { ...defaultTheme };
+    }
+  };
+
+  const storeTheme = (theme) => {
+    const normalized = normalizeTheme(theme);
+    localStorage.setItem(themeStorageKey, JSON.stringify(normalized));
+    return normalized;
+  };
+
+  const applyStoreTheme = (theme) => {
+    const normalized = normalizeTheme(theme || getStoredTheme());
+    const root = document.documentElement;
+    root.style.setProperty("--primary", normalized.primary);
+    root.style.setProperty("--primary-dark", normalized.button);
+    root.style.setProperty("--primary-deep", normalized.button);
+    root.style.setProperty("--accent", normalized.secondary);
+    root.style.setProperty("--border", normalized.secondary);
+    root.style.setProperty("--bg", normalized.secondary);
+    root.style.setProperty("--secondary", normalized.secondary);
+    root.style.setProperty("--font-main", `"${normalized.font}", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`);
+    root.dataset.textSize = normalized.textSize;
+    return normalized;
+  };
+
+  applyStoreTheme(getStoredTheme());
+
   const formatPrice = (value) => {
     const amount = Number(value || 0);
     return `${new Intl.NumberFormat("fr-FR").format(amount)} FCFA`;
@@ -166,6 +216,11 @@
     toast,
     getQueryParam,
     getProductUrl,
-    safeJsonLd
+    safeJsonLd,
+    defaultTheme,
+    normalizeTheme,
+    getStoredTheme,
+    storeTheme,
+    applyStoreTheme
   };
 })();

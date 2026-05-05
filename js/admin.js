@@ -87,7 +87,7 @@
     settings: {
       title: "Parametres boutique",
       kicker: "Configuration",
-      subtitle: "Consultez les parametres publics utilises par Maison Max."
+      subtitle: "Personnalisez les couleurs, la police et la taille du texte de Maison Max."
     }
   };
 
@@ -136,6 +136,9 @@
     elements.openProductsPromo = document.querySelector("[data-admin-open-products-promo]");
     elements.whatsappLink = document.querySelector("[data-admin-whatsapp-link]");
     elements.configNodes = Array.from(document.querySelectorAll("[data-admin-config]"));
+    elements.themeForm = document.querySelector("[data-admin-theme-form]");
+    elements.themeReset = document.querySelector("[data-admin-theme-reset]");
+    elements.themePreview = Array.from(document.querySelectorAll("[data-theme-preview]"));
   };
 
   const showOnly = (section) => {
@@ -192,6 +195,83 @@
       const number = config.WHATSAPP_NUMBER || "";
       elements.whatsappLink.href = number ? `https://wa.me/${number}` : "#";
       elements.whatsappLink.toggleAttribute("aria-disabled", !number);
+    }
+  };
+
+  const getThemeFormValue = () => {
+    if (!elements.themeForm) return utils.getStoredTheme();
+    const data = new FormData(elements.themeForm);
+    return utils.normalizeTheme({
+      primary: data.get("primary"),
+      secondary: data.get("secondary"),
+      button: data.get("button"),
+      font: data.get("font"),
+      textSize: data.get("textSize")
+    });
+  };
+
+  const updateThemePreview = (theme = utils.getStoredTheme()) => {
+    if (!elements.themeForm) return;
+    const normalized = utils.normalizeTheme(theme);
+    elements.themeForm.elements.primary.value = normalized.primary;
+    elements.themeForm.elements.secondary.value = normalized.secondary;
+    elements.themeForm.elements.button.value = normalized.button;
+    elements.themeForm.elements.font.value = normalized.font;
+    elements.themeForm.elements.textSize.value = normalized.textSize;
+
+    elements.themePreview.forEach((node) => {
+      const key = node.dataset.themePreview;
+      node.style.backgroundColor = normalized[key] || normalized.primary;
+    });
+  };
+
+  const applyThemeSetting = (theme, options = {}) => {
+    const normalized = utils.storeTheme(theme);
+    utils.applyStoreTheme(normalized);
+    updateThemePreview(normalized);
+    if (options.toast) utils.toast("Theme applique a la boutique");
+    return normalized;
+  };
+
+  const loadThemeSettings = async () => {
+    let theme = utils.getStoredTheme();
+
+    if (api && api.getSiteSetting) {
+      try {
+        const savedTheme = await api.getSiteSetting("store_theme");
+        if (savedTheme && typeof savedTheme === "object") theme = savedTheme;
+      } catch (error) {
+        // Local theme remains available if Supabase cannot return settings.
+      }
+    }
+
+    applyThemeSetting(theme);
+  };
+
+  const saveThemeSettings = async (event) => {
+    event.preventDefault();
+    const button = elements.themeForm.querySelector("button[type='submit']");
+    const theme = applyThemeSetting(getThemeFormValue());
+    utils.setButtonLoading(button, true, "Enregistrement...");
+
+    try {
+      if (api && api.setSiteSetting) await api.setSiteSetting("store_theme", theme);
+      utils.toast("Parametres boutique enregistres");
+    } catch (error) {
+      utils.toast("Theme applique localement, mais non enregistre dans Supabase", "error");
+    } finally {
+      utils.setButtonLoading(button, false);
+    }
+  };
+
+  const resetThemeSettings = async () => {
+    applyThemeSetting(utils.defaultTheme, { toast: true });
+    if (!api || !api.setSiteSetting) return;
+
+    try {
+      await api.setSiteSetting("store_theme", utils.defaultTheme);
+    } catch (error) {
+      utils.toast("Theme restaure localement, mais Supabase n'a pas ete mis a jour", "error");
     }
   };
 
@@ -1316,8 +1396,22 @@
     }
   };
 
+  const bindPasswordToggle = () => {
+    const toggle = elements.loginForm.querySelector("[data-password-toggle]");
+    const input = elements.loginForm.querySelector("[data-password-input]");
+    if (!toggle || !input) return;
+
+    toggle.addEventListener("click", () => {
+      const visible = input.type === "text";
+      input.type = visible ? "password" : "text";
+      toggle.setAttribute("aria-label", visible ? "Afficher le mot de passe" : "Masquer le mot de passe");
+      toggle.innerHTML = visible ? '<i class="fa-regular fa-eye"></i>' : '<i class="fa-regular fa-eye-slash"></i>';
+    });
+  };
+
   const bind = () => {
     elements.loginForm.addEventListener("submit", handleLogin);
+    bindPasswordToggle();
     elements.productForm.addEventListener("submit", handleProductSubmit);
     elements.cancelEdit.addEventListener("click", resetForm);
     elements.refresh.addEventListener("click", loadAdminData);
@@ -1326,6 +1420,10 @@
     elements.dashboardScrollProducts?.addEventListener("click", scrollToProductList);
     elements.openProductsPromo?.addEventListener("click", openProductsPromotions);
     elements.quickAdd?.addEventListener("click", scrollToProductForm);
+    elements.themeForm?.addEventListener("submit", saveThemeSettings);
+    elements.themeReset?.addEventListener("click", resetThemeSettings);
+    elements.themeForm?.addEventListener("input", () => applyThemeSetting(getThemeFormValue()));
+    elements.themeForm?.addEventListener("change", () => applyThemeSetting(getThemeFormValue()));
     elements.globalSearch?.addEventListener("search", applyGlobalSearch);
     elements.globalSearch?.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
@@ -1408,6 +1506,7 @@
     }
 
     showOnly(elements.app);
+    await loadThemeSettings();
     openAdminSection(getSectionFromHash(), { scroll: false });
     await loadAdminData();
   };
