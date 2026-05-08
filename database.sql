@@ -196,7 +196,7 @@ insert into public.site_settings (key, value)
 values
   ('store_name', '"Maison Max"'::jsonb),
   ('whatsapp_number', '"221774957211"'::jsonb),
-  ('delivery_zones', '["Dakar","Pikine","Guédiawaye","Rufisque","Thiès","Mbour","Saint-Louis","Touba","Kaolack","Ziguinchor"]'::jsonb)
+  ('delivery_zones', '["Afrique de l''Ouest","Afrique centrale","Afrique de l''Est","Afrique australe","Autre pays africain","Dakar","Pikine","Guédiawaye","Rufisque","Thiès","Mbour","Saint-Louis","Touba","Kaolack","Ziguinchor"]'::jsonb)
 on conflict (key) do update set value = excluded.value;
 
 insert into public.products (
@@ -221,7 +221,7 @@ values
     'Robe elegante wax',
     'robe-elegante-wax',
     'Robe fluide en wax premium, coupe chic pour ceremonies et sorties.',
-    'Robe elegante confectionnee dans un tissu wax lumineux avec une coupe confortable. Ideale pour les receptions, les sorties a Dakar et les evenements familiaux.',
+    'Robe elegante confectionnee dans un tissu wax lumineux avec une coupe confortable. Ideale pour les receptions, les sorties en Afrique et les evenements familiaux.',
     15000,
     20000,
     'robes',
@@ -289,5 +289,5 @@ on conflict (slug) do nothing;
 
 -- Apres creation du premier utilisateur dans Supabase Auth, donnez-lui le role admin :
 -- insert into public.admin_profiles (id, role)
--- select id, 'admin' from auth.users where email = 'vendeur@maisonmax.sn'
+-- select id, 'admin' from auth.users where email = 'vendeur@maison-max.com'
 -- on conflict (id) do update set role = excluded.role;

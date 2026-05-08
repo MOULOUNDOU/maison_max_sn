@@ -43,7 +43,8 @@
     productsPage: 1,
     categoryImages: {},
     activeSection: "dashboard",
-    dashboardCharts: {}
+    dashboardCharts: {},
+    currentUser: null
   };
 
   const elements = {};
@@ -139,6 +140,8 @@
     elements.themeForm = document.querySelector("[data-admin-theme-form]");
     elements.themeReset = document.querySelector("[data-admin-theme-reset]");
     elements.themePreview = Array.from(document.querySelectorAll("[data-theme-preview]"));
+    elements.accountForm = document.querySelector("[data-admin-account-form]");
+    elements.currentEmail = document.querySelector("[data-admin-current-email]");
   };
 
   const showOnly = (section) => {
@@ -275,6 +278,65 @@
     }
   };
 
+  const loadAdminAccount = async () => {
+    if (!elements.accountForm || !api.getCurrentUser) return;
+
+    try {
+      state.currentUser = await api.getCurrentUser();
+      if (elements.currentEmail) elements.currentEmail.value = state.currentUser?.email || "";
+    } catch (error) {
+      state.currentUser = null;
+      if (elements.currentEmail) elements.currentEmail.value = "";
+    }
+  };
+
+  const handleAccountSubmit = async (event) => {
+    event.preventDefault();
+    if (!elements.accountForm || !api.updateAdminCredentials) return;
+
+    const form = elements.accountForm;
+    const button = form.querySelector("button[type='submit']");
+    const data = new FormData(form);
+    const currentEmail = state.currentUser?.email || elements.currentEmail?.value || "";
+    const email = String(data.get("email") || "").trim();
+    const password = String(data.get("password") || "");
+    const passwordConfirm = String(data.get("password_confirm") || "");
+    const payload = {};
+
+    if (email && email !== currentEmail) payload.email = email;
+
+    if (password || passwordConfirm) {
+      if (password.length < 8) {
+        utils.toast("Le mot de passe doit contenir au moins 8 caracteres.", "error");
+        return;
+      }
+      if (password !== passwordConfirm) {
+        utils.toast("Les deux mots de passe ne correspondent pas.", "error");
+        return;
+      }
+      payload.password = password;
+    }
+
+    if (!Object.keys(payload).length) {
+      utils.toast("Aucune modification a enregistrer.", "error");
+      return;
+    }
+
+    utils.setButtonLoading(button, true, "Mise a jour...");
+    try {
+      await api.updateAdminCredentials(payload);
+      form.elements.email.value = "";
+      form.elements.password.value = "";
+      form.elements.password_confirm.value = "";
+      await loadAdminAccount();
+      utils.toast(payload.email ? "Compte mis a jour. Confirmez le nouvel email si Supabase le demande." : "Mot de passe mis a jour");
+    } catch (error) {
+      utils.toast(error.message || "Mise a jour du compte impossible", "error");
+    } finally {
+      utils.setButtonLoading(button, false);
+    }
+  };
+
   const openAdminSection = (sectionId, options = {}) => {
     const id = normalizeSectionId(sectionId);
     const meta = sectionMeta[id];
@@ -298,6 +360,7 @@
     if (id === "dashboard") renderDashboardCharts();
     if (id === "promotions") renderPromotions();
     if (id === "settings" || id === "orders") updateConfigSummary();
+    if (id === "settings") loadAdminAccount();
 
     if (options.updateHash) {
       const hash = `#${id}`;
@@ -1341,7 +1404,7 @@
   };
 
   const loadAdminData = async () => {
-    await Promise.all([loadProducts(), loadCategoryImages()]);
+    await Promise.all([loadProducts(), loadCategoryImages(), loadAdminAccount()]);
     renderDashboard();
   };
 
@@ -1421,6 +1484,7 @@
     elements.openProductsPromo?.addEventListener("click", openProductsPromotions);
     elements.quickAdd?.addEventListener("click", scrollToProductForm);
     elements.themeForm?.addEventListener("submit", saveThemeSettings);
+    elements.accountForm?.addEventListener("submit", handleAccountSubmit);
     elements.themeReset?.addEventListener("click", resetThemeSettings);
     elements.themeForm?.addEventListener("input", () => applyThemeSetting(getThemeFormValue()));
     elements.themeForm?.addEventListener("change", () => applyThemeSetting(getThemeFormValue()));

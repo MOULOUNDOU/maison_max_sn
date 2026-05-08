@@ -448,6 +448,39 @@
                     </button>
                   </div>
                 </form>
+                <form class="admin-theme-form admin-account-form" data-admin-account-form>
+                  <div class="admin-card-header compact">
+                    <div>
+                      <h2>Compte admin</h2>
+                      <p>Modifiez l'email de connexion ou remplacez le mot de passe vendeur.</p>
+                    </div>
+                  </div>
+                  <div class="form-grid two">
+                    <label class="field-label">
+                      <span>Email actuel</span>
+                      <input type="email" name="current_email" readonly data-admin-current-email />
+                    </label>
+                    <label class="field-label">
+                      <span>Nouvel email</span>
+                      <input type="email" name="email" autocomplete="email" placeholder="nouvel@email.com" />
+                    </label>
+                  </div>
+                  <div class="form-grid two">
+                    <label class="field-label">
+                      <span>Nouveau mot de passe</span>
+                      <input type="password" name="password" autocomplete="new-password" minlength="8" placeholder="8 caracteres minimum" />
+                    </label>
+                    <label class="field-label">
+                      <span>Confirmer le mot de passe</span>
+                      <input type="password" name="password_confirm" autocomplete="new-password" minlength="8" placeholder="Repeter le mot de passe" />
+                    </label>
+                  </div>
+                  <div class="admin-form-actions">
+                    <button class="btn btn-primary btn-sm" type="submit">
+                      <i class="fa-solid fa-user-shield"></i><span>Mettre a jour le compte</span>
+                    </button>
+                  </div>
+                </form>
                 <div class="admin-settings-grid">
                   <article class="admin-setting-card">
                     <i class="fa-solid fa-store"></i>
@@ -513,6 +546,12 @@
         </div>
         <div>
           <h2>Zones de livraison</h2>
+          <a href="index.html#livraison">Afrique de l'Ouest</a>
+          <a href="index.html#livraison">Afrique centrale</a>
+          <a href="index.html#livraison">Afrique de l'Est</a>
+          <a href="index.html#livraison">Afrique australe</a>
+          <a href="index.html#livraison">Tous pays d'Afrique</a>
+          <a href="index.html#livraison">Livraison securisee</a>
           <a href="index.html#livraison">Dakar</a>
           <a href="index.html#livraison">Pikine &amp; Guediawaye</a>
           <a href="index.html#livraison">Thies &amp; Mbour</a>

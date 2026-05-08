@@ -160,6 +160,20 @@
     return data.session;
   };
 
+  const getCurrentUser = async () => {
+    if (!client) return null;
+    const { data, error } = await client.auth.getUser();
+    if (error) throw error;
+    return data.user;
+  };
+
+  const updateAdminCredentials = async (payload) => {
+    if (!client) throw new Error("Supabase n'est pas encore configure.");
+    const { data, error } = await client.auth.updateUser(payload);
+    if (error) throw error;
+    return data.user;
+  };
+
   const getCurrentAdminProfile = async () => {
     const session = await getSession();
     if (!session) return null;
@@ -189,6 +203,8 @@
     signInAdmin,
     signOut,
     getSession,
+    getCurrentUser,
+    updateAdminCredentials,
     getCurrentAdminProfile
   };
 })();

@@ -7,13 +7,18 @@ const configPath = path.join(root, "js", "config.js");
 
 const defaultConfig = {
   STORE_NAME: "Maison Max",
-  SITE_URL: "https://maisonmax.sn",
+  SITE_URL: "https://maison-max.com",
   SUPABASE_URL: "",
   SUPABASE_ANON_KEY: "",
   WHATSAPP_NUMBER: "221774957211",
   DEFAULT_CITY: "Dakar",
   CURRENCY: "FCFA",
   DELIVERY_ZONES: [
+    "Afrique de l'Ouest",
+    "Afrique centrale",
+    "Afrique de l'Est",
+    "Afrique australe",
+    "Autre pays africain",
     "Dakar",
     "Pikine",
     "Guédiawaye",

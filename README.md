@@ -1,6 +1,6 @@
 # Maison Max
 
-Site e-commerce statique pour une boutique de vetements au Senegal. Le site utilise HTML, CSS, JavaScript vanilla, Supabase pour les produits et WhatsApp pour les commandes.
+Site e-commerce statique pour une boutique de vetements livrant dans toute l'Afrique. Le site utilise HTML, CSS, JavaScript vanilla, Supabase pour les produits et WhatsApp pour les commandes.
 
 ## Fichiers principaux
 
@@ -106,11 +106,11 @@ automatiquement `js/config.js` avec ces variables.
 insert into public.admin_profiles (id, role)
 select id, 'admin'
 from auth.users
-where email = 'vendeur@maisonmax.sn'
+where email = 'vendeur@maison-max.com'
 on conflict (id) do update set role = excluded.role;
 ```
 
-Remplacez `vendeur@maisonmax.sn` par l'email du compte.
+Remplacez `vendeur@maison-max.com` par l'email du compte.
 
 Ensuite ouvrez :
 

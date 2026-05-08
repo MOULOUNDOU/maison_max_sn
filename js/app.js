@@ -210,7 +210,7 @@
       slug: "robe-elegante-wax",
       short_description: "Robe fluide en wax premium, coupe chic pour ceremonies et sorties.",
       description:
-        "Robe elegante confectionnee dans un tissu wax lumineux avec une coupe confortable. Ideale pour les receptions, les sorties a Dakar et les evenements familiaux.",
+        "Robe elegante confectionnee dans un tissu wax lumineux avec une coupe confortable. Ideale pour les receptions, les sorties en Afrique et les evenements familiaux.",
       price: 15000,
       old_price: 20000,
       category: "robes",
@@ -1341,9 +1341,17 @@
     }
     relatedProducts = relatedProducts.filter((item) => item.slug !== product.slug).slice(0, 4);
 
-    document.title = `${product.name} | Maison Max Senegal`;
+    document.title = `${product.name} | Maison Max Afrique`;
     const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) metaDescription.setAttribute("content", product.short_description || product.description);
+    if (metaDescription) {
+      const productSeoDescription = product.short_description || product.description || "Produit Maison Max";
+      metaDescription.setAttribute("content", `${productSeoDescription} Livraison vetements Afrique avec Maison Max.`);
+    }
+    const productUrl = `${config.SITE_URL || window.location.origin}/${utils.getProductUrl(product)}`;
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.setAttribute("href", productUrl);
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) ogUrl.setAttribute("content", productUrl);
     const breadcrumbCurrent = document.querySelector(".breadcrumb span");
     if (breadcrumbCurrent) breadcrumbCurrent.textContent = product.name;
 
@@ -1432,7 +1440,7 @@
     info.appendChild(form);
 
     const services = utils.createEl("div", { className: "product-service-grid" });
-    services.appendChild(createProductService("fa-truck-fast", "Livraison rapide", "Dakar, banlieue et grandes villes selon disponibilite."));
+    services.appendChild(createProductService("fa-truck-fast", "Livraison Afrique", "Livraison rapide et securisee en Afrique de l'Ouest, centrale, de l'Est et australe."));
     services.appendChild(createProductService("fa-brands fa-whatsapp", "Commande WhatsApp", "Validation simple du panier et confirmation directe."));
     services.appendChild(createProductService("fa-rotate-left", "Verification possible", "Controle selon les conditions de livraison et de disponibilite."));
     services.appendChild(createProductService("fa-headset", "Support client", "Conseils tailles, couleurs et disponibilites sur WhatsApp."));
@@ -1459,7 +1467,7 @@
     detailSections.appendChild(
       createProductInfoPanel("Livraison & commande", [
         utils.createEl("p", {
-          text: "Ajoutez l'article au panier, choisissez votre ville de livraison, puis envoyez la commande sur WhatsApp pour finaliser avec Maison Max."
+          text: "Ajoutez l'article au panier, choisissez votre pays ou ville de livraison, puis envoyez la commande sur WhatsApp pour finaliser avec Maison Max depuis toute l'Afrique."
         })
       ])
     );
@@ -1484,6 +1492,7 @@
       "@context": "https://schema.org",
       "@type": "Product",
       name: product.name,
+      url: productUrl,
       image: product.images && product.images.length ? product.images : [product.main_image],
       description: product.description || product.short_description,
       brand: { "@type": "Brand", name: "Maison Max" },
@@ -1491,6 +1500,7 @@
         "@type": "Offer",
         priceCurrency: "XOF",
         price: product.price,
+        url: productUrl,
         availability: product.is_available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
       }
     });
