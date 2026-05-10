@@ -604,6 +604,14 @@
   const createBadge = (text, type) =>
     utils.createEl("span", { className: `product-badge ${type || ""}`, text });
 
+  const createProductRating = () => {
+    const rating = utils.createEl("div", { className: "product-rating", attrs: { "aria-hidden": "true" } });
+    for (let index = 0; index < 5; index += 1) {
+      rating.appendChild(utils.createEl("i", { className: "fa-solid fa-star" }));
+    }
+    return rating;
+  };
+
   const createPriceNode = (product) => {
     const price = utils.createEl("div", { className: "product-price" });
     price.appendChild(utils.createEl("strong", { text: utils.formatPrice(product.price) }));
@@ -624,6 +632,18 @@
     const fallback = categoryGalleryImages[product.category] || fallbackGalleryImages;
     const gallery = utils.unique([...savedGallery, ...fallback, ...fallbackGalleryImages]);
     return gallery.slice(0, Math.max(3, Math.min(gallery.length, 5)));
+  };
+
+  const mergeProductContext = (...groups) => {
+    const seen = new Set();
+    const products = [];
+    groups.flat().forEach((product) => {
+      const key = product && (product.id || product.slug || product.name);
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      products.push(product);
+    });
+    return products;
   };
 
   const getProductSlideDuration = (product, index) => {
@@ -820,6 +840,7 @@
     const body = utils.createEl("div", { className: "product-body" });
     body.appendChild(utils.createEl("p", { className: "product-category", text: getCategoryLabel(product.category) }));
     body.appendChild(utils.createEl("h3", { text: product.name }));
+    body.appendChild(createProductRating());
     body.appendChild(
       utils.createEl("p", {
         className: "product-desc",
@@ -1488,6 +1509,9 @@
       startProductCarousels();
     }
 
+    state.products = mergeProductContext([product], relatedProducts);
+    state.visibleProducts = state.products;
+
     utils.safeJsonLd({
       "@context": "https://schema.org",
       "@type": "Product",
@@ -1684,6 +1708,14 @@
     hydrateWhatsAppLinks();
     initRandomHeroImages();
     loadThemeSettings();
+    if (window.MMAI) {
+      window.MMAI.initShopAssistant({
+        getProducts: () => state.products,
+        getVisibleProducts: () => state.visibleProducts,
+        getSelectedCategory: () => state.selectedCategory,
+        getCategoryLabel
+      });
+    }
     initHome();
     hydrateProductPage();
   });

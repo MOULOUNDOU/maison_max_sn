@@ -1504,7 +1504,7 @@ body:not(.admin-body) {
 
 .product-body {
   display: grid;
-  grid-template-rows: auto auto minmax(38px, auto) auto auto;
+  grid-template-rows: auto auto auto minmax(38px, auto) auto auto;
   gap: 8px;
   padding: 14px;
 }
@@ -1529,6 +1529,19 @@ body:not(.admin-body) {
   margin: 0;
   color: var(--muted);
   font-size: 13px;
+}
+
+.product-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: #F6B800;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.product-rating i {
+  filter: drop-shadow(0 1px 1px rgba(74, 55, 42, 0.18));
 }
 
 .product-price {
@@ -1920,6 +1933,160 @@ body:not(.admin-body) .cart-button b {
   background: #20b15a;
   box-shadow: 0 14px 30px rgba(32, 177, 90, 0.32);
   font-size: 28px;
+}
+
+.ai-shop-launcher {
+  position: fixed;
+  right: 18px;
+  bottom: 88px;
+  z-index: 46;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  width: 58px;
+  height: 58px;
+  padding: 7px 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--white);
+  background: #1F7A76;
+  box-shadow: 0 14px 30px rgba(31, 122, 118, 0.28);
+  font-size: 19px;
+}
+
+.ai-shop-launcher span {
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.ai-shop-widget {
+  position: fixed;
+  right: 18px;
+  bottom: 154px;
+  z-index: 70;
+  width: min(390px, calc(100vw - 28px));
+  display: grid;
+  grid-template-rows: auto minmax(160px, 320px) auto auto;
+  overflow: hidden;
+  border: 1px solid rgba(31, 122, 118, 0.18);
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: 0 22px 60px rgba(46, 36, 29, 0.2);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.ai-shop-widget.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.ai-shop-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  color: var(--white);
+  background: #1F7A76;
+}
+
+.ai-shop-header span,
+.ai-shop-header strong {
+  display: block;
+}
+
+.ai-shop-header span {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.ai-shop-messages {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  padding: 12px;
+  overflow: auto;
+  background: #F7FBFA;
+}
+
+.ai-message {
+  display: flex;
+}
+
+.ai-message span {
+  max-width: 84%;
+  padding: 9px 11px;
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--white);
+  border: 1px solid rgba(31, 122, 118, 0.14);
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 6px 16px rgba(46, 36, 29, 0.06);
+}
+
+.ai-message.user {
+  justify-content: flex-end;
+}
+
+.ai-message.user span {
+  color: var(--white);
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.ai-message.is-pending span {
+  color: #1F6B67;
+  background: #EAF7F5;
+  border-color: rgba(31, 122, 118, 0.22);
+}
+
+.ai-shop-suggestions {
+  display: flex;
+  gap: 7px;
+  padding: 10px 12px 0;
+  overflow-x: auto;
+  background: var(--white);
+  scrollbar-width: none;
+}
+
+.ai-shop-suggestions::-webkit-scrollbar {
+  display: none;
+}
+
+.ai-shop-suggestions button {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(31, 122, 118, 0.22);
+  border-radius: 999px;
+  color: #1F6B67;
+  background: #EAF7F5;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ai-shop-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  background: var(--white);
+}
+
+.ai-shop-form input {
+  min-height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0 10px;
 }
 
 .cart-overlay,
@@ -3754,6 +3921,96 @@ body:not(.admin-body) .cart-button b {
   font-weight: 600;
 }
 
+.admin-ai-panel {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 14px;
+  border: 1px solid rgba(31, 122, 118, 0.2);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #FFFFFF 0%, #EAF7F5 100%);
+}
+
+.admin-ai-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-ai-head span {
+  color: #1F7A76;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.admin-ai-head h3 {
+  margin: 2px 0 0;
+  font-size: 18px;
+}
+
+.admin-ai-head > i {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--white);
+  background: #1F7A76;
+}
+
+.admin-ai-actions,
+.admin-ai-suggestion-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-ai-result {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-ai-empty,
+.admin-ai-suggestion {
+  border: 1px solid rgba(31, 122, 118, 0.16);
+  border-radius: 6px;
+  background: var(--white);
+}
+
+.admin-ai-empty {
+  padding: 11px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-ai-suggestion {
+  display: grid;
+  gap: 9px;
+  padding: 12px;
+}
+
+.admin-ai-suggestion h4,
+.admin-ai-suggestion p {
+  margin: 0;
+}
+
+.admin-ai-suggestion h4 {
+  font-size: 17px;
+}
+
+.admin-ai-suggestion p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.admin-ai-short {
+  color: var(--text) !important;
+  font-weight: 700;
+}
+
 .admin-image-url-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3793,9 +4050,31 @@ body:not(.admin-body) .cart-button b {
 }
 
 .admin-image-thumb img {
+  display: block;
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
+}
+
+.admin-image-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  color: var(--white);
+  background: rgba(30, 24, 20, 0.78);
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(25, 20, 16, 0.22);
+}
+
+.admin-image-remove:hover {
+  background: var(--primary-deep);
 }
 
 .admin-image-thumb span {
@@ -4072,6 +4351,31 @@ body:not(.admin-body) .cart-button b {
 .admin-body .admin-category-image-content h3,
 .admin-body .admin-setting-card strong {
   font-weight: 700;
+}
+
+@media (max-width: 560px) {
+  .ai-shop-launcher {
+    right: 12px;
+    bottom: 82px;
+    width: 54px;
+    height: 54px;
+  }
+
+  .ai-shop-widget {
+    right: 12px;
+    bottom: 142px;
+    width: calc(100vw - 24px);
+    grid-template-rows: auto minmax(150px, 52vh) auto auto;
+  }
+
+  .ai-shop-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-ai-actions .btn,
+  .admin-ai-suggestion-actions .btn {
+    flex: 1 1 auto;
+  }
 }
 
 [hidden] {

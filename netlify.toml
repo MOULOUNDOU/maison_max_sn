@@ -2,6 +2,9 @@
   publish = "."
   command = "node scripts/generate-config.js"
 
+[functions]
+  directory = "netlify/functions"
+
 [[redirects]]
   from = "/admin"
   to = "/admin.html"

@@ -39,6 +39,7 @@
     filtered: [],
     editingId: null,
     ready: false,
+    selectedImageFiles: [],
     previewObjectUrls: [],
     productsPage: 1,
     categoryImages: {},
@@ -142,6 +143,10 @@
     elements.themePreview = Array.from(document.querySelectorAll("[data-theme-preview]"));
     elements.accountForm = document.querySelector("[data-admin-account-form]");
     elements.currentEmail = document.querySelector("[data-admin-current-email]");
+    elements.aiNotes = document.querySelector("[data-admin-ai-notes]");
+    elements.aiGenerate = document.querySelector("[data-admin-ai-generate]");
+    elements.aiImprove = document.querySelector("[data-admin-ai-improve]");
+    elements.aiResult = document.querySelector("[data-admin-ai-result]");
   };
 
   const showOnly = (section) => {
@@ -416,16 +421,68 @@
       .unique(elements.imageUrlInputs.map((input) => input.value.trim()))
       .slice(0, maxProductImages);
 
+  const getImageUrlEntries = () => {
+    const seen = new Set();
+    return elements.imageUrlInputs
+      .map((input) => ({ src: input.value.trim() }))
+      .filter((entry) => {
+        if (!entry.src || seen.has(entry.src)) return false;
+        seen.add(entry.src);
+        return true;
+      })
+      .slice(0, maxProductImages);
+  };
+
   const setImageUrls = (urls = []) => {
     elements.imageUrlInputs.forEach((input, index) => {
       input.value = urls[index] || "";
     });
   };
 
+  const getImageFileKey = (file) => [file.name, file.type, file.size, file.lastModified].join(":");
+
+  const syncImageUploadInput = () => {
+    if (!elements.imageUpload) return;
+    if (typeof DataTransfer === "undefined") {
+      elements.imageUpload.value = "";
+      return;
+    }
+    const transfer = new DataTransfer();
+    state.selectedImageFiles.forEach((file) => transfer.items.add(file));
+    try {
+      elements.imageUpload.files = transfer.files;
+    } catch (error) {
+      elements.imageUpload.value = "";
+    }
+  };
+
   const getSelectedImageFiles = (availableSlots = maxProductImages) =>
-    Array.from(elements.imageUpload?.files || [])
-      .filter((file) => file.type.startsWith("image/"))
-      .slice(0, Math.max(0, availableSlots));
+    state.selectedImageFiles.slice(0, Math.max(0, availableSlots));
+
+  const addSelectedImageFiles = (files = []) => {
+    const incoming = Array.from(files).filter((file) => file.type.startsWith("image/"));
+    const urlCount = getImageUrls().length;
+    const availableSlots = Math.max(0, maxProductImages - urlCount - state.selectedImageFiles.length);
+    const existingKeys = new Set(state.selectedImageFiles.map(getImageFileKey));
+    const accepted = [];
+
+    incoming.forEach((file) => {
+      const key = getImageFileKey(file);
+      if (existingKeys.has(key) || accepted.length >= availableSlots) return;
+      accepted.push(file);
+      existingKeys.add(key);
+    });
+
+    state.selectedImageFiles = [...state.selectedImageFiles, ...accepted];
+    syncImageUploadInput();
+    return { incomingCount: incoming.length, acceptedCount: accepted.length };
+  };
+
+  const removeSelectedImageFile = (fileIndex) => {
+    state.selectedImageFiles.splice(fileIndex, 1);
+    syncImageUploadInput();
+    renderImagePreview();
+  };
 
   const revokePreviewUrls = () => {
     state.previewObjectUrls.forEach((url) => URL.revokeObjectURL(url));
@@ -461,8 +518,118 @@
     };
   };
 
+  const getAiProductDraft = () => {
+    const form = elements.productForm;
+    const category = String(form.elements.category.value || "").trim();
+    return {
+      name: String(form.elements.name.value || "").trim(),
+      category,
+      category_label: getCategoryLabel(category),
+      subcategory: String(form.elements.subcategory.value || "").trim(),
+      price: parsePriceValue(form.elements.price.value),
+      old_price: parsePriceValue(form.elements.old_price.value) || null,
+      sizes: utils.normalizeArray(form.elements.sizes.value),
+      colors: utils.normalizeArray(form.elements.colors.value),
+      short_description: String(form.elements.short_description.value || "").trim(),
+      description: String(form.elements.description.value || "").trim(),
+      notes: String(elements.aiNotes?.value || "").trim()
+    };
+  };
+
+  const hasAiDraftContent = (draft) =>
+    Boolean(
+      draft.name ||
+        draft.category ||
+        draft.subcategory ||
+        draft.notes ||
+        draft.short_description ||
+        draft.description ||
+        draft.sizes.length ||
+        draft.colors.length
+    );
+
+  const clearAiSuggestion = () => {
+    if (elements.aiResult) elements.aiResult.replaceChildren();
+  };
+
+  const applyAiSuggestion = (suggestion, fields = ["title", "short_description", "description"]) => {
+    const form = elements.productForm;
+    if (fields.includes("title") && suggestion.title) {
+      form.elements.name.value = suggestion.title;
+      if (!state.editingId || !form.elements.slug.value) form.elements.slug.value = utils.slugify(suggestion.title);
+    }
+    if (fields.includes("short_description") && suggestion.short_description) {
+      form.elements.short_description.value = suggestion.short_description;
+    }
+    if (fields.includes("description") && suggestion.description) {
+      form.elements.description.value = suggestion.description;
+    }
+    utils.toast("Suggestion IA appliquee");
+  };
+
+  const renderAiSuggestion = (suggestion) => {
+    if (!elements.aiResult) return;
+    elements.aiResult.replaceChildren();
+
+    if (!suggestion || (!suggestion.title && !suggestion.short_description && !suggestion.description)) {
+      elements.aiResult.appendChild(utils.createEl("div", { className: "admin-ai-empty", text: "Aucune suggestion disponible." }));
+      return;
+    }
+
+    const card = utils.createEl("article", { className: "admin-ai-suggestion" });
+    if (suggestion.title) card.appendChild(utils.createEl("h4", { text: suggestion.title }));
+    if (suggestion.short_description) card.appendChild(utils.createEl("p", { className: "admin-ai-short", text: suggestion.short_description }));
+    if (suggestion.description) card.appendChild(utils.createEl("p", { text: suggestion.description }));
+
+    const actions = utils.createEl("div", { className: "admin-ai-suggestion-actions" });
+    const applyAll = utils.createEl("button", { className: "btn btn-primary btn-sm", attrs: { type: "button" } });
+    applyAll.innerHTML = '<i class="fa-solid fa-check"></i><span>Tout appliquer</span>';
+    applyAll.addEventListener("click", () => applyAiSuggestion(suggestion));
+
+    const titleOnly = utils.createEl("button", { className: "btn btn-light btn-sm", attrs: { type: "button" } });
+    titleOnly.innerHTML = '<i class="fa-solid fa-heading"></i><span>Titre</span>';
+    titleOnly.addEventListener("click", () => applyAiSuggestion(suggestion, ["title"]));
+
+    const textOnly = utils.createEl("button", { className: "btn btn-light btn-sm", attrs: { type: "button" } });
+    textOnly.innerHTML = '<i class="fa-solid fa-align-left"></i><span>Descriptions</span>';
+    textOnly.addEventListener("click", () => applyAiSuggestion(suggestion, ["short_description", "description"]));
+
+    actions.append(applyAll, titleOnly, textOnly);
+    card.appendChild(actions);
+    elements.aiResult.appendChild(card);
+  };
+
+  const runProductAi = async (mode, button) => {
+    if (!window.MMAI) {
+      utils.toast("Assistant IA indisponible.", "error");
+      return;
+    }
+
+    const draft = getAiProductDraft();
+    if (!hasAiDraftContent(draft)) {
+      utils.toast("Ajoutez un nom, une categorie ou quelques details pour l'IA.", "error");
+      return;
+    }
+
+    utils.setButtonLoading(button, true, "IA...");
+    try {
+      const suggestion = await window.MMAI.generateProductCopy({
+        mode,
+        product: draft,
+        store: window.MAISON_MAX_CONFIG || {}
+      });
+      renderAiSuggestion(suggestion);
+      if (suggestion && suggestion.fallback) utils.toast("Suggestion rapide generee localement");
+    } catch (error) {
+      utils.toast(error.message || "Generation IA impossible", "error");
+    } finally {
+      utils.setButtonLoading(button, false);
+    }
+  };
+
   const resetForm = () => {
     state.editingId = null;
+    state.selectedImageFiles = [];
     elements.productForm.reset();
     elements.productForm.querySelector("[name='is_available']").checked = true;
     setImageUrls();
@@ -470,19 +637,24 @@
     renderImagePreview();
     elements.formTitle.textContent = "Ajouter un produit";
     elements.cancelEdit.hidden = true;
+    clearAiSuggestion();
   };
 
   const renderImagePreview = () => {
     revokePreviewUrls();
     elements.imagesPreview.replaceChildren();
-    const imageUrls = getImageUrls();
-    const files = getSelectedImageFiles(maxProductImages - imageUrls.length);
+    const imageUrlEntries = getImageUrlEntries();
+    const files = getSelectedImageFiles(maxProductImages - imageUrlEntries.length);
     const previews = [
-      ...imageUrls.map((url, index) => ({ src: url, label: `URL ${index + 1}` })),
+      ...imageUrlEntries.map((entry, index) => ({
+        src: entry.src,
+        label: `URL ${index + 1}`,
+        type: "url"
+      })),
       ...files.map((file, index) => {
         const src = URL.createObjectURL(file);
         state.previewObjectUrls.push(src);
-        return { src, label: `Upload ${index + 1}` };
+        return { src, label: `Upload ${index + 1}`, type: "file", fileIndex: index };
       })
     ].slice(0, maxProductImages);
 
@@ -499,6 +671,22 @@
     previews.forEach((preview) => {
       const wrap = utils.createEl("div", { className: "admin-image-thumb" });
       wrap.appendChild(utils.createEl("img", { attrs: { src: preview.src, alt: "Image produit", loading: "lazy" } }));
+      const removeButton = utils.createEl("button", {
+        className: "admin-image-remove",
+        attrs: { type: "button", "aria-label": "Retirer cette image" }
+      });
+      removeButton.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      removeButton.addEventListener("click", () => {
+        if (preview.type === "url") {
+          elements.imageUrlInputs.forEach((input) => {
+            if (input.value.trim() === preview.src) input.value = "";
+          });
+          renderImagePreview();
+          return;
+        }
+        removeSelectedImageFile(preview.fileIndex);
+      });
+      wrap.appendChild(removeButton);
       wrap.appendChild(utils.createEl("span", { text: preview.label }));
       elements.imagesPreview.appendChild(wrap);
     });
@@ -518,12 +706,14 @@
     form.elements.sizes.value = (product.sizes || []).join(", ");
     form.elements.colors.value = (product.colors || []).join(", ");
     setImageUrls(utils.unique([product.main_image, ...(product.images || [])]).slice(0, maxProductImages));
+    state.selectedImageFiles = [];
     if (elements.imageUpload) elements.imageUpload.value = "";
     form.elements.is_available.checked = product.is_available;
     form.elements.is_featured.checked = product.is_featured;
     form.elements.is_promo.checked = product.is_promo;
     elements.formTitle.textContent = "Modifier le produit";
     elements.cancelEdit.hidden = false;
+    clearAiSuggestion();
     renderImagePreview();
     openAdminSection("add-product", { updateHash: true });
     elements.productForm.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1488,6 +1678,8 @@
     elements.themeReset?.addEventListener("click", resetThemeSettings);
     elements.themeForm?.addEventListener("input", () => applyThemeSetting(getThemeFormValue()));
     elements.themeForm?.addEventListener("change", () => applyThemeSetting(getThemeFormValue()));
+    elements.aiGenerate?.addEventListener("click", () => runProductAi("generate", elements.aiGenerate));
+    elements.aiImprove?.addEventListener("click", () => runProductAi("improve", elements.aiImprove));
     elements.globalSearch?.addEventListener("search", applyGlobalSearch);
     elements.globalSearch?.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
@@ -1534,10 +1726,9 @@
     });
 
     elements.imageUpload.addEventListener("change", () => {
-      const urls = getImageUrls();
-      const files = Array.from(elements.imageUpload.files || []);
-      if (urls.length + files.length > maxProductImages) {
-        utils.toast("Seules 3 images seront enregistrees pour ce produit.", "error");
+      const result = addSelectedImageFiles(elements.imageUpload.files || []);
+      if (result.incomingCount > result.acceptedCount) {
+        utils.toast("Maximum 3 images par produit.", "error");
       }
       renderImagePreview();
     });

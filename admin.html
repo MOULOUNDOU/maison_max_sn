@@ -226,6 +226,29 @@
                   <button class="text-btn" type="button" data-cancel-edit hidden>Annuler</button>
                 </div>
 
+                <div class="admin-ai-panel">
+                  <div class="admin-ai-head">
+                    <div>
+                      <span>IA</span>
+                      <h3>Assistant produit</h3>
+                    </div>
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  </div>
+                  <label class="field-label">
+                    <span>Details pour l'IA</span>
+                    <textarea data-admin-ai-notes rows="3" placeholder="Ex: robe wax fluide, manches courtes, ceremonie, couleurs rouge et or..."></textarea>
+                  </label>
+                  <div class="admin-ai-actions">
+                    <button class="btn btn-primary btn-sm" type="button" data-admin-ai-generate>
+                      <i class="fa-solid fa-wand-magic-sparkles"></i><span>Proposer</span>
+                    </button>
+                    <button class="btn btn-outline btn-sm" type="button" data-admin-ai-improve>
+                      <i class="fa-solid fa-pen-nib"></i><span>Ameliorer</span>
+                    </button>
+                  </div>
+                  <div class="admin-ai-result" data-admin-ai-result aria-live="polite"></div>
+                </div>
+
                 <form class="admin-form" data-product-form>
                   <div class="form-grid two">
                     <label class="field-label">
@@ -304,7 +327,7 @@
                     <label class="field-label">
                       <span>Uploader des images</span>
                       <input id="product-images" type="file" name="images" accept="image/*" multiple data-image-upload />
-                      <small class="field-help">Vous pouvez melanger URLs et uploads, mais seules 3 images seront enregistrees.</small>
+                      <small class="field-help">Vous pouvez melanger URLs et uploads. Maximum 3 images.</small>
                     </label>
 
                     <div class="admin-images-preview" data-images-preview></div>
@@ -578,6 +601,7 @@
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/supabase.js"></script>
+    <script src="js/ai.js"></script>
     <script src="js/admin.js"></script>
   </body>
 </html>

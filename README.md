@@ -13,6 +13,8 @@ Site e-commerce statique pour une boutique de vetements livrant dans toute l'Afr
 - `js/app.js` : catalogue, filtres, modal produit et SEO produit.
 - `js/cart.js` : panier localStorage et message WhatsApp.
 - `js/admin.js` : CRUD admin, upload images et filtres.
+- `js/ai.js` : assistant IA public et generation de textes produit cote admin.
+- `netlify/functions/ai.js` : proxy serveur Netlify vers OpenRouter.
 - `database.sql` : schema complet Supabase, RLS et policies Storage.
 
 ## 1. Creer le projet Supabase
@@ -165,6 +167,29 @@ Merci.
 3. Ajoutez les variables `SUPABASE_URL` et `SUPABASE_ANON_KEY` dans Netlify.
 4. Le build command est deja configure dans `netlify.toml`.
 5. Le dossier de publication est la racine du projet.
+
+### IA OpenRouter
+
+L'assistant IA utilise une fonction Netlify pour garder la cle API privee.
+Ajoutez ces variables dans `Site configuration > Environment variables` :
+
+```txt
+OPENROUTER_API_KEY
+OPENROUTER_MODEL
+SITE_URL
+```
+
+`OPENROUTER_MODEL` est optionnel. Sans valeur, le site utilise `openai/gpt-4o-mini`.
+`SITE_URL` doit correspondre au domaine public, par exemple `https://maisonmax.sn`.
+
+Pour tester l'IA en local sans Netlify CLI, creez un fichier `.env` avec ces
+variables puis lancez :
+
+```bash
+node scripts/local-dev.js
+```
+
+Ouvrez ensuite `http://localhost:8888/boutique.html` ou `http://localhost:8888/admin.html`.
 
 ### Vercel
 
