@@ -211,7 +211,7 @@
 
   const generateProductCopy = async (payload) => {
     const data = await request("admin-product-copy", payload);
-    return { ...(data.suggestion || {}), fallback: Boolean(data.fallback) };
+    return data.suggestion || {};
   };
 
   window.MMAI = {

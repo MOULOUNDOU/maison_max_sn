@@ -135,28 +135,6 @@ const getProductContext = (context = {}) => ({
   products: Array.isArray(context.products) ? context.products.map(sanitizeProduct).slice(0, MAX_PRODUCTS) : []
 });
 
-const titleCase = (value) =>
-  cleanText(value, 120)
-    .toLowerCase()
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-
-const getFallbackAdminSuggestion = (payload = {}) => {
-  const draft = payload.product || {};
-  const name = cleanText(draft.name || draft.notes || "Produit Maison Max", 90);
-  const category = cleanText(draft.category_label || draft.category, 60);
-  const colors = cleanArray(draft.colors, 3).join(", ");
-  const sizes = cleanArray(draft.sizes, 4).join(", ");
-  const price = Number(draft.price || 0);
-  const title = titleCase(name).slice(0, 90);
-  const details = [category, colors ? `couleurs: ${colors}` : "", sizes ? `tailles: ${sizes}` : ""].filter(Boolean).join(", ");
-  const priceText = price > 0 ? ` Prix: ${price} FCFA.` : "";
-  return {
-    title,
-    short_description: cleanAssistantReply(`${title}, une piece elegante et facile a porter chez Maison Max.`).slice(0, 180),
-    description: cleanAssistantReply(`${title} disponible chez Maison Max. ${details ? `Details: ${details}.` : ""}${priceText} Ideal pour completer une tenue avec style et simplicite.`).slice(0, 900)
-  };
-};
-
 const normalizeLoose = (value) =>
   cleanText(value, 300)
     .normalize("NFD")
@@ -398,27 +376,18 @@ exports.handler = async (event) => {
     }
 
     if (body.action === "admin-product-copy") {
-      const useRemoteAdmin = String(process.env.OPENROUTER_ADMIN_REMOTE || "").toLowerCase() === "true";
-      if (!useRemoteAdmin) {
-        return json(200, { suggestion: getFallbackAdminSuggestion(body.payload || {}), fallback: true }, headers);
+      const content = await callOpenRouter({
+        messages: buildAdminMessages(body.payload || {}),
+        maxTokens: 220,
+        temperature: 0.28,
+        responseFormat: { type: "json_object" }
+      });
+      const suggestion = parseSuggestion(content);
+      if (suggestion.title || suggestion.short_description || suggestion.description) {
+        return json(200, { suggestion }, headers);
       }
 
-      try {
-        const content = await callOpenRouter({
-          messages: buildAdminMessages(body.payload || {}),
-          maxTokens: 220,
-          temperature: 0.28,
-          responseFormat: { type: "json_object" }
-        });
-        const suggestion = parseSuggestion(content);
-        if (suggestion.title || suggestion.short_description || suggestion.description) {
-          return json(200, { suggestion }, headers);
-        }
-      } catch (error) {
-        if (error.name !== "AbortError") throw error;
-      }
-
-      return json(200, { suggestion: getFallbackAdminSuggestion(body.payload || {}), fallback: true }, headers);
+      return json(502, { error: "L'IA n'a pas renvoye de proposition exploitable. Reessayez avec plus de details." }, headers);
     }
 
     return json(400, { error: "Action IA inconnue." }, headers);

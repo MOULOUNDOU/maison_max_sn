@@ -619,7 +619,6 @@
         store: window.MAISON_MAX_CONFIG || {}
       });
       renderAiSuggestion(suggestion);
-      if (suggestion && suggestion.fallback) utils.toast("Suggestion rapide generee localement");
     } catch (error) {
       utils.toast(error.message || "Generation IA impossible", "error");
     } finally {
