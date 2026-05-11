@@ -382,6 +382,8 @@
       select.replaceChildren();
       if (select.dataset.categoryOptions === "filter") {
         select.appendChild(utils.createEl("option", { attrs: { value: "all" }, text: "Toutes les categories" }));
+      } else {
+        select.appendChild(utils.createEl("option", { attrs: { value: "" }, text: "Choisir une categorie" }));
       }
       categories.forEach(([value, label]) => {
         select.appendChild(utils.createEl("option", { attrs: { value }, text: label }));
@@ -577,9 +579,19 @@
     }
 
     const card = utils.createEl("article", { className: "admin-ai-suggestion" });
-    if (suggestion.title) card.appendChild(utils.createEl("h4", { text: suggestion.title }));
-    if (suggestion.short_description) card.appendChild(utils.createEl("p", { className: "admin-ai-short", text: suggestion.short_description }));
-    if (suggestion.description) card.appendChild(utils.createEl("p", { text: suggestion.description }));
+    const preview = utils.createEl("div", { className: "admin-ai-preview" });
+    [
+      ["Titre", suggestion.title, "admin-ai-title"],
+      ["Accroche", suggestion.short_description, "admin-ai-short"],
+      ["Description", suggestion.description, ""]
+    ].forEach(([label, text, className]) => {
+      if (!text) return;
+      const block = utils.createEl("div", { className: `admin-ai-field ${className}`.trim() });
+      block.appendChild(utils.createEl("span", { text: label }));
+      block.appendChild(label === "Titre" ? utils.createEl("h4", { text }) : utils.createEl("p", { text }));
+      preview.appendChild(block);
+    });
+    card.appendChild(preview);
 
     const actions = utils.createEl("div", { className: "admin-ai-suggestion-actions" });
     const applyAll = utils.createEl("button", { className: "btn btn-primary btn-sm", attrs: { type: "button" } });

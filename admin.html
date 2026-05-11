@@ -230,20 +230,26 @@
                   <div class="admin-ai-head">
                     <div>
                       <span>IA</span>
-                      <h3>Assistant produit</h3>
+                      <h3>Assistant produit IA</h3>
+                      <small>Titres, accroches et descriptions</small>
                     </div>
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                   </div>
+                  <div class="admin-ai-pills" aria-label="Capacites IA produit">
+                    <span><i class="fa-solid fa-heading"></i> Vrai titre</span>
+                    <span><i class="fa-solid fa-pen-nib"></i> Texte vendeur</span>
+                    <span><i class="fa-solid fa-shield-heart"></i> Faits respectes</span>
+                  </div>
                   <label class="field-label">
                     <span>Details pour l'IA</span>
-                    <textarea data-admin-ai-notes rows="3" placeholder="Ex: robe wax fluide, manches courtes, ceremonie, couleurs rouge et or..."></textarea>
+                    <textarea data-admin-ai-notes rows="3" placeholder="Ex: grand boubou homme blanc, broderie doree, ceremonie, manches longues..."></textarea>
                   </label>
                   <div class="admin-ai-actions">
                     <button class="btn btn-primary btn-sm" type="button" data-admin-ai-generate>
-                      <i class="fa-solid fa-wand-magic-sparkles"></i><span>Proposer</span>
+                      <i class="fa-solid fa-wand-magic-sparkles"></i><span>Proposer une fiche</span>
                     </button>
                     <button class="btn btn-outline btn-sm" type="button" data-admin-ai-improve>
-                      <i class="fa-solid fa-pen-nib"></i><span>Ameliorer</span>
+                      <i class="fa-solid fa-pen-nib"></i><span>Ameliorer la fiche</span>
                     </button>
                   </div>
                   <div class="admin-ai-result" data-admin-ai-result aria-live="polite"></div>
@@ -307,7 +313,7 @@
                   <div class="admin-gallery-panel">
                     <div class="admin-gallery-head">
                       <span>Images produit</span>
-                      <small>3 images maximum, la premiere devient l'image principale.</small>
+                      <small>3 images maximum, l'affichage public les melange automatiquement.</small>
                     </div>
                     <div class="admin-image-url-grid">
                       <label class="field-label">
@@ -327,7 +333,7 @@
                     <label class="field-label">
                       <span>Uploader des images</span>
                       <input id="product-images" type="file" name="images" accept="image/*" multiple data-image-upload />
-                      <small class="field-help">Vous pouvez melanger URLs et uploads. Maximum 3 images.</small>
+                      <small class="field-help">Vous pouvez melanger URLs et uploads. Maximum 3 images, ordre aleatoire cote boutique.</small>
                     </label>
 
                     <div class="admin-images-preview" data-images-preview></div>

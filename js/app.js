@@ -487,6 +487,7 @@
   const state = {
     products: [],
     visibleProducts: [],
+    productImageOrders: new Map(),
     selectedCategory: "all",
     search: "",
     minPrice: "",
@@ -518,6 +519,15 @@
         categoryRank(a.category) - categoryRank(b.category) ||
         new Date(b.created_at) - new Date(a.created_at)
     );
+
+  const shuffleItems = (items) => {
+    const shuffled = [...items];
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    }
+    return shuffled;
+  };
 
   const shuffleProducts = (products) => {
     for (let index = products.length - 1; index > 0; index -= 1) {
@@ -621,18 +631,107 @@
     return price;
   };
 
+  const openImageViewer = (src, alt = "Image produit") => {
+    if (!src) return;
+    let viewer = document.querySelector("[data-image-viewer]");
+    if (!viewer) {
+      viewer = utils.createEl("div", {
+        className: "image-viewer",
+        attrs: { "data-image-viewer": "", "aria-hidden": "true" }
+      });
+      viewer.innerHTML = `
+        <div class="image-viewer-frame">
+          <button class="image-viewer-close" type="button" data-image-viewer-close aria-label="Fermer l'image">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <img data-image-viewer-img alt="" />
+        </div>
+      `;
+      document.body.appendChild(viewer);
+      viewer.addEventListener("click", (event) => {
+        if (event.target === viewer) closeImageViewer();
+      });
+      viewer.querySelector("[data-image-viewer-close]")?.addEventListener("click", closeImageViewer);
+    }
+
+    const image = viewer.querySelector("[data-image-viewer-img]");
+    image.src = src;
+    image.alt = alt;
+    viewer.classList.add("is-open");
+    viewer.setAttribute("aria-hidden", "false");
+    document.body.classList.add("image-viewer-open");
+  };
+
+  const closeImageViewer = () => {
+    const viewer = document.querySelector("[data-image-viewer]");
+    if (!viewer) return;
+    viewer.classList.remove("is-open");
+    viewer.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("image-viewer-open");
+  };
+
+  const createProductImage = ({ className = "", src, alt, loading = "lazy", attrs = {}, viewer = true } = {}) => {
+    const imageAttrs = {
+      ...attrs,
+      src: attrs.src || src || utils.fallbackImage,
+      alt: attrs.alt || alt || "Produit Maison Max"
+    };
+    if (loading) imageAttrs.loading = loading;
+
+    const image = utils.createEl("img", { className, attrs: imageAttrs });
+    image.addEventListener("error", () => {
+      if (image.dataset.fallbackApplied === "true") return;
+      image.dataset.fallbackApplied = "true";
+      image.src = utils.fallbackImage;
+    });
+    if (viewer) {
+      image.classList.add("is-viewable");
+      image.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        openImageViewer(image.currentSrc || image.src, image.alt);
+      });
+    }
+    return image;
+  };
+
+  const setProductImageSource = (image, src) => {
+    if (!image) return;
+    delete image.dataset.fallbackApplied;
+    image.src = src || utils.fallbackImage;
+  };
+
+  const getRandomizedProductGallery = (product, gallery) => {
+    if (gallery.length < 2) return gallery;
+
+    const keySource = product.id || product.slug || product.name || "product";
+    const cacheKey = `${keySource}:${gallery.join("|")}`;
+    if (!state.productImageOrders.has(cacheKey)) {
+      const shuffled = shuffleItems(gallery);
+      if (shuffled.length > 1 && shuffled.every((src, index) => src === gallery[index])) {
+        shuffled.push(shuffled.shift());
+      }
+      state.productImageOrders.set(cacheKey, shuffled);
+    }
+    return [...state.productImageOrders.get(cacheKey)];
+  };
+
   const getProductGallery = (product) => {
     const savedGallery = utils.unique([product.main_image, ...(product.images || [])]);
     const isDemoProduct = String(product.id || "").startsWith("demo-");
+    let gallery;
 
     if (!isDemoProduct) {
-      return savedGallery.length ? savedGallery : [utils.fallbackImage];
+      gallery = savedGallery.length ? savedGallery : [utils.fallbackImage];
+      return getRandomizedProductGallery(product, gallery);
     }
 
     const fallback = categoryGalleryImages[product.category] || fallbackGalleryImages;
-    const gallery = utils.unique([...savedGallery, ...fallback, ...fallbackGalleryImages]);
-    return gallery.slice(0, Math.max(3, Math.min(gallery.length, 5)));
+    gallery = utils.unique([...savedGallery, ...fallback, ...fallbackGalleryImages]);
+    return getRandomizedProductGallery(product, gallery.slice(0, Math.max(3, Math.min(gallery.length, 5))));
   };
+
+  const getProductDisplayImage = (product) => getProductGallery(product)[0] || product.main_image || utils.fallbackImage;
 
   const mergeProductContext = (...groups) => {
     const seen = new Set();
@@ -788,14 +887,12 @@
     const gallery = getProductGallery(product);
     gallery.forEach((src, index) => {
       productCarousel.appendChild(
-        utils.createEl("img", {
+        createProductImage({
           className: `product-carousel-image ${index === 0 ? "is-active" : ""}`,
-          attrs: {
-            src,
-            alt: product.name,
-            loading: "lazy",
-            "data-duration": getProductSlideDuration(product, index)
-          }
+          src,
+          alt: product.name,
+          loading: "lazy",
+          attrs: { "data-duration": getProductSlideDuration(product, index) }
         })
       );
     });
@@ -1029,8 +1126,10 @@
   const createMiniProduct = (product) => {
     const item = utils.createEl("article", { className: "mini-product" });
     item.appendChild(
-      utils.createEl("img", {
-        attrs: { src: product.main_image || utils.fallbackImage, alt: product.name, loading: "lazy" }
+      createProductImage({
+        src: getProductDisplayImage(product),
+        alt: product.name,
+        loading: "lazy"
       })
     );
     const info = utils.createEl("div");
@@ -1070,8 +1169,10 @@
     if (!product) return;
 
     holder.replaceChildren();
-    const image = utils.createEl("img", {
-      attrs: { src: product.main_image || utils.fallbackImage, alt: product.name, loading: "lazy" }
+    const image = createProductImage({
+      src: getProductDisplayImage(product),
+      alt: product.name,
+      loading: "lazy"
     });
     const content = utils.createEl("div", { className: "hot-deal-content" });
     content.appendChild(createBadge("Hot Deal", "promo"));
@@ -1110,19 +1211,21 @@
     body.replaceChildren();
 
     const gallery = utils.createEl("div", { className: "modal-gallery" });
-    const main = utils.createEl("img", {
+    const galleryImages = getProductGallery(product);
+    const main = createProductImage({
       className: "modal-main-image",
-      attrs: { src: product.main_image || utils.fallbackImage, alt: product.name }
+      src: galleryImages[0] || utils.fallbackImage,
+      alt: product.name,
+      loading: "eager"
     });
     gallery.appendChild(main);
 
     const thumbs = utils.createEl("div", { className: "modal-thumbs" });
-    const galleryImages = getProductGallery(product);
     galleryImages.forEach((src) => {
       const button = utils.createEl("button", { attrs: { type: "button" } });
-      button.appendChild(utils.createEl("img", { attrs: { src, alt: product.name, loading: "lazy" } }));
+      button.appendChild(createProductImage({ src, alt: product.name, loading: "lazy", viewer: false }));
       button.addEventListener("click", () => {
-        main.src = src;
+        setProductImageSource(main, src);
       });
       thumbs.appendChild(button);
     });
@@ -1223,7 +1326,12 @@
     overlay && overlay.addEventListener("click", closeProductModal);
 
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") closeProductModal();
+      if (event.key !== "Escape") return;
+      if (document.querySelector("[data-image-viewer].is-open")) {
+        closeImageViewer();
+        return;
+      }
+      closeProductModal();
     });
   };
 
@@ -1379,9 +1487,11 @@
     detail.replaceChildren();
     const galleryImages = getProductGallery(product);
     const imageWrap = utils.createEl("div", { className: "product-page-gallery" });
-    const mainImage = utils.createEl("img", {
+    const mainImage = createProductImage({
       className: "product-detail-main-image",
-      attrs: { src: galleryImages[0] || utils.fallbackImage, alt: product.name, loading: "eager" }
+      src: galleryImages[0] || utils.fallbackImage,
+      alt: product.name,
+      loading: "eager"
     });
     imageWrap.appendChild(mainImage);
 
@@ -1392,9 +1502,9 @@
           className: index === 0 ? "is-active" : "",
           attrs: { type: "button", "aria-label": `Image ${index + 1} de ${product.name}` }
         });
-        button.appendChild(utils.createEl("img", { attrs: { src, alt: product.name, loading: "lazy" } }));
+        button.appendChild(createProductImage({ src, alt: product.name, loading: "lazy", viewer: false }));
         button.addEventListener("click", () => {
-          mainImage.src = src;
+          setProductImageSource(mainImage, src);
           thumbs.querySelectorAll("button").forEach((item) => item.classList.toggle("is-active", item === button));
         });
         thumbs.appendChild(button);
@@ -1641,18 +1751,9 @@
     });
   };
 
-  const shuffle = (items) => {
-    const copy = [...items];
-    for (let i = copy.length - 1; i > 0; i -= 1) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [copy[i], copy[j]] = [copy[j], copy[i]];
-    }
-    return copy;
-  };
-
   const initRandomHeroImages = () => {
     const heroSlides = Array.from(document.querySelectorAll(".hero-slide"));
-    shuffle(heroImagePool).slice(0, heroSlides.length).forEach((src, index) => {
+    shuffleItems(heroImagePool).slice(0, heroSlides.length).forEach((src, index) => {
       heroSlides[index].src = src;
     });
 
