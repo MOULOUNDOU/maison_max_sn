@@ -192,12 +192,12 @@
     const header = utils.createEl("div", { className: "ai-shop-header" });
     const avatar = utils.createEl("div", { className: "ai-shop-avatar" });
     avatar.innerHTML = '<img src="assets/logo-maison-max.jpg" alt="Maison Max" />';
-    const titleWrap = utils.createEl("div");
-    titleWrap.appendChild(utils.createEl("span", { text: "Maison Max" }));
-    titleWrap.appendChild(utils.createEl("strong", { text: "Assistant IA" }));
-    titleWrap.appendChild(utils.createEl("small", { text: "En ligne" }));
+    const titleWrap = utils.createEl("div", { className: "ai-shop-copy" });
+    titleWrap.appendChild(utils.createEl("span", { text: "Conseil shopping" }));
+    titleWrap.appendChild(utils.createEl("strong", { text: "Assistant Maison Max" }));
+    titleWrap.appendChild(utils.createEl("small", { text: "Besoin d'aide pour choisir un produit ?" }));
     const close = utils.createEl("button", {
-      className: "icon-btn small",
+      className: "icon-btn small ai-shop-close",
       attrs: { type: "button", "aria-label": "Fermer l'assistant IA" }
     });
     close.innerHTML = '<i class="fa-solid fa-xmark"></i>';
@@ -229,11 +229,13 @@
         type: "text",
         maxlength: "260",
         placeholder: "Demander un conseil...",
+        autocomplete: "off",
+        enterkeyhint: "send",
         "aria-label": "Message pour l'assistant IA"
       }
     });
     const submit = utils.createEl("button", {
-      className: "btn btn-primary btn-sm",
+      className: "btn btn-primary btn-sm ai-shop-submit",
       attrs: { type: "submit" }
     });
     submit.innerHTML = '<i class="fa-solid fa-paper-plane"></i><span>Envoyer</span>';
@@ -241,13 +243,175 @@
     widget.append(header, messages, suggestions, form);
     document.body.append(launcher, widget);
 
+    const mobileAssistantQuery = window.matchMedia("(max-width: 760px)");
+    let mobileLockActive = false;
+    let mobileLockScrollY = 0;
+    let mobileViewportBaseHeight = 0;
+    let mobileSavedBodyStyles = null;
+    let mobileSavedHtmlStyles = null;
+
+    const isMobileAssistant = () => mobileAssistantQuery.matches;
+
+    const restoreMobileScroll = () => {
+      if (!mobileLockActive) return;
+      document.body.style.top = `-${mobileLockScrollY}px`;
+      document.documentElement.style.setProperty("--ai-shop-scroll-lock-top", `-${mobileLockScrollY}px`);
+    };
+
+    const instantScrollTo = (top) => {
+      const html = document.documentElement;
+      const previousScrollBehavior = html.style.scrollBehavior;
+      html.style.scrollBehavior = "auto";
+      window.scrollTo(0, top);
+      html.style.scrollBehavior = previousScrollBehavior;
+    };
+
+    const getMobileLayoutHeight = () =>
+      Math.round(
+        Math.max(
+          window.innerHeight || 0,
+          document.documentElement.clientHeight || 0,
+          window.visualViewport?.height || 0
+        )
+      );
+
+    const setMobileKeyboardMetrics = () => {
+      if (!isMobileAssistant()) return;
+      const viewport = window.visualViewport;
+      const viewportHeight = Math.round(
+        viewport?.height || window.innerHeight || document.documentElement.clientHeight || 0
+      );
+      const layoutHeight = getMobileLayoutHeight();
+      const viewportOffsetTop = Math.round(viewport?.offsetTop || 0);
+      const isTyping = document.activeElement === input;
+      if (!mobileViewportBaseHeight || !isTyping) {
+        mobileViewportBaseHeight = layoutHeight;
+      }
+      const keyboardOffset = isTyping ? Math.max(0, mobileViewportBaseHeight - viewportHeight - viewportOffsetTop) : 0;
+      if (viewportHeight > 0) {
+        document.documentElement.style.setProperty("--ai-shop-mobile-viewport-height", `${viewportHeight}px`);
+      }
+      document.documentElement.style.setProperty("--ai-shop-keyboard-offset", `${keyboardOffset}px`);
+    };
+
+    const focusMobileInputWithoutScroll = (event) => {
+      if (!isMobileAssistant() || !widget.classList.contains("is-open")) return;
+      if (event?.cancelable) event.preventDefault();
+      lockMobilePage();
+      try {
+        input.focus({ preventScroll: true });
+      } catch (error) {
+        input.focus();
+      }
+      keepMobileAssistantStable();
+      scheduleMobileKeyboardMetrics();
+      restoreMobileScroll();
+    };
+
+    const lockMobilePage = () => {
+      if (!isMobileAssistant()) return;
+      if (mobileLockActive) return;
+      mobileLockScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      mobileSavedBodyStyles = {
+        position: document.body.style.position,
+        top: document.body.style.top,
+        left: document.body.style.left,
+        right: document.body.style.right,
+        width: document.body.style.width,
+        overflow: document.body.style.overflow,
+        overscrollBehavior: document.body.style.overscrollBehavior
+      };
+      mobileSavedHtmlStyles = {
+        overflow: document.documentElement.style.overflow,
+        overscrollBehavior: document.documentElement.style.overscrollBehavior
+      };
+      mobileViewportBaseHeight = getMobileLayoutHeight();
+      setMobileKeyboardMetrics();
+      mobileLockActive = true;
+      document.documentElement.style.setProperty("--ai-shop-scroll-lock-top", `-${mobileLockScrollY}px`);
+      document.documentElement.style.overflow = "hidden";
+      document.documentElement.style.overscrollBehavior = "none";
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${mobileLockScrollY}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
+      document.body.style.overscrollBehavior = "none";
+      document.documentElement.classList.add("ai-shop-page-locked");
+      document.body.classList.add("ai-shop-page-locked");
+    };
+
+    const unlockMobilePage = () => {
+      if (!mobileLockActive) {
+        document.documentElement.style.removeProperty("--ai-shop-mobile-viewport-height");
+        document.documentElement.style.removeProperty("--ai-shop-keyboard-offset");
+        mobileViewportBaseHeight = 0;
+        return;
+      }
+      const restoreY = mobileLockScrollY;
+      mobileLockActive = false;
+      document.documentElement.classList.remove("ai-shop-page-locked");
+      document.body.classList.remove("ai-shop-page-locked");
+      document.documentElement.style.removeProperty("--ai-shop-scroll-lock-top");
+      document.documentElement.style.removeProperty("--ai-shop-mobile-viewport-height");
+      document.documentElement.style.removeProperty("--ai-shop-keyboard-offset");
+      if (mobileSavedHtmlStyles) {
+        document.documentElement.style.overflow = mobileSavedHtmlStyles.overflow;
+        document.documentElement.style.overscrollBehavior = mobileSavedHtmlStyles.overscrollBehavior;
+      }
+      if (mobileSavedBodyStyles) {
+        document.body.style.position = mobileSavedBodyStyles.position;
+        document.body.style.top = mobileSavedBodyStyles.top;
+        document.body.style.left = mobileSavedBodyStyles.left;
+        document.body.style.right = mobileSavedBodyStyles.right;
+        document.body.style.width = mobileSavedBodyStyles.width;
+        document.body.style.overflow = mobileSavedBodyStyles.overflow;
+        document.body.style.overscrollBehavior = mobileSavedBodyStyles.overscrollBehavior;
+      }
+      mobileSavedBodyStyles = null;
+      mobileSavedHtmlStyles = null;
+      mobileViewportBaseHeight = 0;
+      instantScrollTo(restoreY);
+    };
+
+    const scheduleMobileKeyboardMetrics = () => {
+      if (!widget.classList.contains("is-open") || !isMobileAssistant()) return;
+      [0, 80, 180, 320].forEach((delay) => {
+        window.setTimeout(() => {
+          setMobileKeyboardMetrics();
+          scrollMessages(messages);
+          restoreMobileScroll();
+        }, delay);
+      });
+    };
+
+    const keepMobileAssistantStable = () => {
+      if (!widget.classList.contains("is-open")) return;
+      if (!isMobileAssistant()) {
+        unlockMobilePage();
+        return;
+      }
+      setMobileKeyboardMetrics();
+      restoreMobileScroll();
+    };
+
     const setOpen = (isOpen) => {
       widget.classList.toggle("is-open", isOpen);
       widget.setAttribute("aria-hidden", String(!isOpen));
       launcher.setAttribute("aria-expanded", String(isOpen));
       if (isOpen) {
-        input.focus();
+        lockMobilePage();
+        if (!isMobileAssistant()) {
+          try {
+            input.focus({ preventScroll: true });
+          } catch (error) {
+            input.focus();
+          }
+        }
         scrollMessages(messages);
+      } else {
+        unlockMobilePage();
       }
     };
 
@@ -303,6 +467,22 @@
 
     launcher.addEventListener("click", () => setOpen(!widget.classList.contains("is-open")));
     close.addEventListener("click", () => setOpen(false));
+    input.addEventListener(window.PointerEvent ? "pointerdown" : "touchstart", focusMobileInputWithoutScroll, {
+      passive: false
+    });
+    input.addEventListener("focus", () => {
+      lockMobilePage();
+      keepMobileAssistantStable();
+      scheduleMobileKeyboardMetrics();
+    });
+    input.addEventListener("blur", () => {
+      window.setTimeout(() => {
+        if (mobileLockActive) {
+          setMobileKeyboardMetrics();
+          restoreMobileScroll();
+        }
+      }, 120);
+    });
     suggestions.addEventListener("click", (event) => {
       const chip = event.target.closest("button");
       if (!chip) return;
@@ -315,6 +495,50 @@
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") setOpen(false);
     });
+    document.addEventListener(
+      "touchmove",
+      (event) => {
+        if (!mobileLockActive || !isMobileAssistant()) return;
+        if (messages.contains(event.target)) return;
+        if (event.cancelable) event.preventDefault();
+        restoreMobileScroll();
+      },
+      { passive: false }
+    );
+    let messagesTouchY = 0;
+    messages.addEventListener(
+      "touchstart",
+      (event) => {
+        messagesTouchY = event.touches?.[0]?.clientY || 0;
+      },
+      { passive: true }
+    );
+    messages.addEventListener(
+      "touchmove",
+      (event) => {
+        if (!mobileLockActive || !isMobileAssistant()) return;
+        const currentY = event.touches?.[0]?.clientY || messagesTouchY;
+        const deltaY = currentY - messagesTouchY;
+        const canScroll = messages.scrollHeight > messages.clientHeight;
+        const atTop = messages.scrollTop <= 0;
+        const atBottom = messages.scrollTop + messages.clientHeight >= messages.scrollHeight - 1;
+        if (!canScroll || (atTop && deltaY > 0) || (atBottom && deltaY < 0)) {
+          if (event.cancelable) event.preventDefault();
+          restoreMobileScroll();
+        }
+        messagesTouchY = currentY;
+      },
+      { passive: false }
+    );
+    window.addEventListener("resize", keepMobileAssistantStable, { passive: true });
+    window.addEventListener("scroll", keepMobileAssistantStable, { passive: true });
+    window.visualViewport?.addEventListener("resize", keepMobileAssistantStable, { passive: true });
+    window.visualViewport?.addEventListener("scroll", keepMobileAssistantStable, { passive: true });
+    if (mobileAssistantQuery.addEventListener) {
+      mobileAssistantQuery.addEventListener("change", keepMobileAssistantStable);
+    } else {
+      mobileAssistantQuery.addListener(keepMobileAssistantStable);
+    }
   };
 
   const generateProductCopy = async (payload) => {

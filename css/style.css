@@ -1551,11 +1551,11 @@ img.is-viewable:hover {
 @keyframes aiPulse {
   0%,
   100% {
-    box-shadow: 0 18px 38px rgba(184, 50, 90, 0.36);
+    box-shadow: 0 18px 42px rgba(46, 36, 29, 0.24), 0 0 0 6px rgba(232, 220, 203, 0.28);
   }
 
   50% {
-    box-shadow: 0 18px 38px rgba(184, 50, 90, 0.52), 0 0 0 8px rgba(212, 160, 23, 0.12);
+    box-shadow: 0 18px 42px rgba(46, 36, 29, 0.3), 0 0 0 9px rgba(232, 220, 203, 0.36);
   }
 }
 
@@ -1671,6 +1671,81 @@ img.is-viewable:hover {
 .product-carousel-dots span.is-active {
   width: 18px;
   background: var(--white);
+}
+
+@media (max-width: 760px) {
+  .product-image-carousel[data-auto-carousel="css"]:not(.is-user-controlled) .product-carousel-image {
+    animation-delay: var(--slide-delay, 0ms);
+    animation-duration: var(--product-carousel-cycle, 15000ms);
+    animation-fill-mode: none;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    will-change: opacity;
+  }
+
+  .product-image-carousel[data-auto-carousel="css"][data-slide-count="2"]:not(.is-user-controlled) .product-carousel-image {
+    animation-name: productCarouselFade2;
+  }
+
+  .product-image-carousel[data-auto-carousel="css"][data-slide-count="3"]:not(.is-user-controlled) .product-carousel-image {
+    animation-name: productCarouselFade3;
+  }
+
+  .product-image-carousel[data-auto-carousel="css"][data-slide-count="4"]:not(.is-user-controlled) .product-carousel-image {
+    animation-name: productCarouselFade4;
+  }
+
+  .product-image-carousel[data-auto-carousel="css"][data-slide-count="5"]:not(.is-user-controlled) .product-carousel-image {
+    animation-name: productCarouselFade5;
+  }
+}
+
+@keyframes productCarouselFade2 {
+  0%,
+  42% {
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes productCarouselFade3 {
+  0%,
+  28% {
+    opacity: 1;
+  }
+
+  33.333%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes productCarouselFade4 {
+  0%,
+  21% {
+    opacity: 1;
+  }
+
+  25%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes productCarouselFade5 {
+  0%,
+  17% {
+    opacity: 1;
+  }
+
+  20%,
+  100% {
+    opacity: 0;
+  }
 }
 
 .badge-stack,
@@ -2162,27 +2237,31 @@ body:not(.admin-body) .cart-button b {
   place-items: center;
   align-content: center;
   gap: 2px;
-  width: 64px;
-  height: 64px;
+  width: 62px;
+  height: 62px;
   padding: 5px 0 6px;
-  border: 0;
+  border: 1px solid rgba(255, 255, 255, 0.74);
   border-radius: 50%;
   color: var(--white);
-  background: linear-gradient(135deg, #B8325A, #D4A017);
-  box-shadow: 0 18px 38px rgba(184, 50, 90, 0.36);
+  background: #2E241D;
+  box-shadow: 0 18px 42px rgba(46, 36, 29, 0.24), 0 0 0 6px rgba(232, 220, 203, 0.28);
   font-size: 13px;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
   animation: clickableAppear 0.42s ease both, aiPulse 3.4s ease-in-out 1s infinite;
 }
 
+.ai-shop-launcher:hover {
+  background: #3D2D23;
+}
+
 .ai-shop-launcher img {
-  width: 36px;
-  height: 36px;
-  border: 2px solid rgba(255, 255, 255, 0.86);
+  width: 35px;
+  height: 35px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   object-fit: cover;
   background: var(--white);
-  box-shadow: 0 5px 14px rgba(74, 27, 48, 0.22);
+  box-shadow: 0 5px 14px rgba(46, 36, 29, 0.22);
 }
 
 .ai-shop-launcher i {
@@ -2194,8 +2273,8 @@ body:not(.admin-body) .cart-button b {
   width: 19px;
   height: 19px;
   border-radius: 50%;
-  color: #4A1F31;
-  background: #FFE7A3;
+  color: #2E241D;
+  background: #E8DCCB;
   font-size: 10px;
 }
 
@@ -2203,7 +2282,7 @@ body:not(.admin-body) .cart-button b {
   font-size: 10px;
   font-weight: 900;
   line-height: 1;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
 }
 
 .ai-shop-widget {
@@ -2211,14 +2290,17 @@ body:not(.admin-body) .cart-button b {
   right: 18px;
   bottom: 154px;
   z-index: 70;
-  width: min(430px, calc(100vw - 28px));
+  width: min(432px, calc(100vw - 28px));
+  height: min(640px, calc(100vh - 188px));
+  max-height: calc(100vh - 188px);
+  min-height: 0;
   display: grid;
-  grid-template-rows: auto minmax(190px, 380px) auto auto;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
   overflow: hidden;
-  border: 1px solid rgba(184, 50, 90, 0.2);
-  border-radius: 14px;
+  border: 1px solid rgba(46, 36, 29, 0.12);
+  border-radius: 22px;
   background: var(--white);
-  box-shadow: 0 24px 70px rgba(74, 27, 48, 0.22);
+  box-shadow: 0 28px 72px rgba(46, 36, 29, 0.22), 0 2px 10px rgba(46, 36, 29, 0.08);
   opacity: 0;
   pointer-events: none;
   transform: translateY(14px) scale(0.98);
@@ -2232,14 +2314,32 @@ body:not(.admin-body) .cart-button b {
   transform: translateY(0) scale(1);
 }
 
+@supports (height: 100dvh) {
+  .ai-shop-widget {
+    height: min(640px, calc(100dvh - 188px));
+    max-height: calc(100dvh - 188px);
+  }
+}
+
 .ai-shop-header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px;
-  color: var(--white);
-  background: linear-gradient(135deg, #4A1F31, #B8325A 58%, #D4A017);
+  min-width: 0;
+  padding: 16px;
+  color: #1F1813;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FBFAF8 100%);
+  border-bottom: 1px solid rgba(46, 36, 29, 0.09);
+}
+
+.ai-shop-header::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, #2E241D, #6B4F3A 55%, #D2BEA6);
 }
 
 .ai-shop-title {
@@ -2250,15 +2350,16 @@ body:not(.admin-body) .cart-button b {
 }
 
 .ai-shop-avatar {
+  flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
+  width: 46px;
+  height: 46px;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(107, 79, 58, 0.18);
   border-radius: 50%;
   background: var(--white);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 22px rgba(46, 36, 29, 0.12);
 }
 
 .ai-shop-avatar img {
@@ -2267,39 +2368,78 @@ body:not(.admin-body) .cart-button b {
   object-fit: cover;
 }
 
+.ai-shop-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
 .ai-shop-header span,
 .ai-shop-header strong,
 .ai-shop-header small {
   display: block;
+  min-width: 0;
 }
 
 .ai-shop-header span {
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--primary);
   font-size: 11px;
   font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
 .ai-shop-header strong {
-  font-size: 16px;
+  overflow: hidden;
+  color: #1F1813;
+  font-size: 17px;
+  line-height: 1.16;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ai-shop-header small {
-  margin-top: 2px;
-  color: #FFE7A3;
-  font-size: 11px;
-  font-weight: 800;
+  color: #7B6A5A;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.ai-shop-close {
+  flex: 0 0 auto;
+  color: #2E241D;
+  background: #F5EFE6;
+  border-color: rgba(107, 79, 58, 0.16);
+}
+
+.ai-shop-close:hover {
+  background: #E8DCCB;
 }
 
 .ai-shop-messages {
-  display: grid;
-  align-content: start;
-  gap: 10px;
-  padding: 14px;
-  overflow: auto;
-  background:
-    linear-gradient(180deg, rgba(255, 247, 232, 0.94), rgba(255, 241, 246, 0.9)),
-    #FFF8EF;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  background: #F6F4F1;
+  scrollbar-color: rgba(107, 79, 58, 0.34) transparent;
+  scrollbar-width: thin;
+}
+
+.ai-shop-messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ai-shop-messages::-webkit-scrollbar-thumb {
+  border: 2px solid #F6F4F1;
+  border-radius: 999px;
+  background: rgba(107, 79, 58, 0.28);
 }
 
 .ai-message {
@@ -2308,15 +2448,16 @@ body:not(.admin-body) .cart-button b {
 }
 
 .ai-message-bubble {
-  max-width: 86%;
-  padding: 10px 12px;
-  border-radius: 12px 12px 12px 4px;
-  color: #351B26;
+  max-width: 88%;
+  padding: 11px 13px;
+  border-radius: 16px 16px 16px 6px;
+  color: #2E241D;
   background: #FFFFFF;
-  border: 1px solid rgba(184, 50, 90, 0.14);
-  font-size: 13px;
-  line-height: 1.4;
-  box-shadow: 0 8px 20px rgba(74, 27, 48, 0.08);
+  border: 1px solid rgba(46, 36, 29, 0.08);
+  font-size: 14px;
+  line-height: 1.48;
+  box-shadow: 0 10px 24px rgba(46, 36, 29, 0.07);
+  word-break: break-word;
 }
 
 .ai-message-bubble p {
@@ -2328,8 +2469,8 @@ body:not(.admin-body) .cart-button b {
 }
 
 .ai-message-bubble strong {
-  color: #B8325A;
-  font-weight: 900;
+  color: var(--primary-dark);
+  font-weight: 800;
 }
 
 .ai-message-bubble ul {
@@ -2344,7 +2485,7 @@ body:not(.admin-body) .cart-button b {
 }
 
 .ai-message-bubble li::marker {
-  color: #D4A017;
+  color: var(--primary);
 }
 
 .ai-message.user {
@@ -2353,9 +2494,10 @@ body:not(.admin-body) .cart-button b {
 
 .ai-message.user .ai-message-bubble {
   color: var(--white);
-  background: #4A1F31;
-  border-color: #4A1F31;
-  border-radius: 12px 12px 4px 12px;
+  background: #2E241D;
+  border-color: #2E241D;
+  border-radius: 16px 16px 6px 16px;
+  box-shadow: 0 10px 24px rgba(46, 36, 29, 0.16);
 }
 
 .ai-message.user .ai-message-bubble strong {
@@ -2363,18 +2505,21 @@ body:not(.admin-body) .cart-button b {
 }
 
 .ai-message.is-pending .ai-message-bubble {
-  color: #8E2748;
-  background: #FFF1F6;
-  border-color: rgba(184, 50, 90, 0.18);
+  color: #5C493A;
+  background: #FFFDFB;
+  border-color: rgba(107, 79, 58, 0.14);
   animation: aiThinking 1.2s ease-in-out infinite;
 }
 
 .ai-shop-suggestions {
   display: flex;
   gap: 7px;
-  padding: 11px 14px 0;
+  min-width: 0;
+  padding: 11px 14px 9px;
   overflow-x: auto;
   background: var(--white);
+  border-top: 1px solid rgba(46, 36, 29, 0.08);
+  scroll-snap-type: x proximity;
   scrollbar-width: none;
 }
 
@@ -2386,40 +2531,72 @@ body:not(.admin-body) .cart-button b {
   flex: 0 0 auto;
   min-height: 34px;
   padding: 0 12px;
-  border: 1px solid rgba(184, 50, 90, 0.2);
+  border: 1px solid rgba(107, 79, 58, 0.14);
   border-radius: 999px;
-  color: #8E2748;
-  background: #FFF1F6;
+  color: #4A372A;
+  background: #FAF7F2;
   font-size: 12px;
   font-weight: 800;
+  scroll-snap-align: start;
+  white-space: nowrap;
   transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
 }
 
 .ai-shop-suggestions button:hover {
   transform: translateY(-1px);
-  border-color: #B8325A;
-  background: #FFE4EE;
+  border-color: rgba(74, 55, 42, 0.3);
+  background: #F0E6D8;
 }
 
 .ai-shop-form {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   gap: 8px;
-  padding: 11px 14px 14px;
-  background: var(--white);
+  min-width: 0;
+  padding: 10px 14px 14px;
+  background: rgba(255, 255, 255, 0.98);
+  border-top: 1px solid rgba(46, 36, 29, 0.08);
 }
 
 .ai-shop-form input {
-  min-height: 42px;
-  border: 1px solid rgba(184, 50, 90, 0.2);
-  border-radius: 8px;
-  padding: 0 12px;
-  background: #FFFDFB;
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  border: 1px solid rgba(107, 79, 58, 0.16);
+  border-radius: 999px;
+  padding: 0 15px;
+  color: #2E241D;
+  background: #F8F6F2;
+  font-size: 16px;
+  line-height: 1.2;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .ai-shop-form input:focus {
-  outline: 2px solid rgba(212, 160, 23, 0.22);
-  border-color: #B8325A;
+  outline: 0;
+  border-color: rgba(74, 55, 42, 0.48);
+  background: #FFFFFF;
+  box-shadow: 0 0 0 4px rgba(232, 220, 203, 0.72);
+}
+
+.ai-shop-form .ai-shop-submit {
+  min-height: 46px;
+  border-radius: 999px;
+  padding: 0 15px;
+  background: #2E241D;
+  border-color: #2E241D;
+  box-shadow: 0 12px 24px rgba(46, 36, 29, 0.18);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.ai-shop-form .ai-shop-submit:hover {
+  background: #4A372A;
+  border-color: #4A372A;
 }
 
 .cart-overlay,
@@ -4745,23 +4922,124 @@ body:not(.admin-body) .cart-button b {
   font-weight: 700;
 }
 
-@media (max-width: 560px) {
+@media (max-width: 760px) {
+  html.ai-shop-page-locked,
+  body.ai-shop-page-locked {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  body.ai-shop-page-locked {
+    position: fixed;
+    top: var(--ai-shop-scroll-lock-top, 0px);
+    left: 0;
+    right: 0;
+    width: 100%;
+  }
+
+  body:has(.ai-shop-widget.is-open) {
+    overflow: hidden;
+  }
+
   .ai-shop-launcher {
-    right: 12px;
-    bottom: 82px;
-    width: 54px;
-    height: 54px;
+    right: 14px;
+    bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+    width: 56px;
+    height: 56px;
+  }
+
+  .ai-shop-launcher img {
+    width: 32px;
+    height: 32px;
   }
 
   .ai-shop-widget {
-    right: 12px;
-    bottom: 142px;
-    width: calc(100vw - 24px);
-    grid-template-rows: auto minmax(150px, 52vh) auto auto;
+    left: 10px;
+    right: 10px;
+    bottom: calc(10px + var(--ai-shop-keyboard-offset, 0px) + env(safe-area-inset-bottom, 0px));
+    width: auto;
+    height: calc(var(--ai-shop-mobile-viewport-height, 100vh) - 20px - env(safe-area-inset-bottom, 0px));
+    max-height: calc(var(--ai-shop-mobile-viewport-height, 100vh) - 20px - env(safe-area-inset-bottom, 0px));
+    min-height: 0;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    border-radius: 20px;
+    transform-origin: bottom center;
+    overscroll-behavior: contain;
+    touch-action: manipulation;
+  }
+
+  @supports (height: 100svh) {
+    .ai-shop-widget {
+      height: calc(var(--ai-shop-mobile-viewport-height, 100svh) - 20px - env(safe-area-inset-bottom, 0px));
+      max-height: calc(var(--ai-shop-mobile-viewport-height, 100svh) - 20px - env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  .ai-shop-header {
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .ai-shop-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .ai-shop-header strong {
+    font-size: 15px;
+  }
+
+  .ai-shop-header small {
+    font-size: 11.5px;
+  }
+
+  .ai-shop-messages {
+    gap: 10px;
+    padding: 12px;
+    touch-action: pan-y;
+  }
+
+  .ai-message-bubble {
+    max-width: 91%;
+    font-size: 14px;
+  }
+
+  .ai-shop-suggestions {
+    padding: 9px 12px 8px;
+    touch-action: pan-x;
   }
 
   .ai-shop-form {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) 46px;
+    gap: 8px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    touch-action: manipulation;
+  }
+
+  .ai-shop-form input,
+  .ai-shop-form .ai-shop-submit,
+  .ai-shop-close {
+    touch-action: manipulation;
+  }
+
+  .ai-shop-form .ai-shop-submit {
+    width: 46px;
+    min-width: 46px;
+    height: 46px;
+    padding: 0;
+    border-radius: 50%;
+  }
+
+  .ai-shop-form .ai-shop-submit span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
   }
 
   .admin-ai-actions .btn,

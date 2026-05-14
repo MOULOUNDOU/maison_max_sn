@@ -776,6 +776,7 @@
       const currentImages = carousel.querySelectorAll(".product-carousel-image");
       if (currentImages.length < 2) return;
       const next = (Number(carousel.dataset.index || 0) + 1) % currentImages.length;
+      carousel.classList.remove("is-user-controlled");
       setProductCarouselIndex(carousel, next);
       scheduleProductCarousel(carousel, timerIndex);
     }, getCurrentSlideDuration(carousel));
@@ -880,11 +881,21 @@
       attrs: { href: utils.getProductUrl(product), "aria-label": `Voir ${product.name}` }
     });
     media.addEventListener("click", handleProductLinkClick);
+    const gallery = getProductGallery(product);
+    const slideDurations = gallery.map((_, index) => getProductSlideDuration(product, index));
+    const cssStepDuration = slideDurations.length
+      ? Math.round(slideDurations.reduce((sum, duration) => sum + duration, 0) / slideDurations.length)
+      : 5000;
     const productCarousel = utils.createEl("div", {
       className: "product-image-carousel",
-      attrs: { "data-product-carousel": "", "data-index": "0" }
+      attrs: {
+        "data-product-carousel": "",
+        "data-index": "0",
+        "data-slide-count": gallery.length,
+        "data-auto-carousel": gallery.length > 1 && gallery.length <= 5 ? "css" : null,
+        style: gallery.length > 1 ? `--product-carousel-cycle: ${cssStepDuration * gallery.length}ms;` : null
+      }
     });
-    const gallery = getProductGallery(product);
     gallery.forEach((src, index) => {
       productCarousel.appendChild(
         createProductImage({
@@ -892,7 +903,10 @@
           src,
           alt: product.name,
           loading: "lazy",
-          attrs: { "data-duration": getProductSlideDuration(product, index) }
+          attrs: {
+            "data-duration": slideDurations[index],
+            style: gallery.length > 1 ? `--slide-delay: ${cssStepDuration * index}ms;` : null
+          }
         })
       );
     });
@@ -918,6 +932,7 @@
         const images = productCarousel.querySelectorAll(".product-carousel-image");
         if (!images.length) return;
         const current = Number(productCarousel.dataset.index || 0);
+        productCarousel.classList.add("is-user-controlled");
         setProductCarouselIndex(productCarousel, current + dir);
         restartProductCarousel(productCarousel);
       };
