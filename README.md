@@ -125,7 +125,7 @@ Ensuite ouvrez :
 Dans `js/config.js`, modifiez :
 
 ```js
-WHATSAPP_NUMBER: "221774957211"
+WHATSAPP_NUMBER: "221777036107"
 ```
 
 Format recommande : indicatif pays + numero, sans `+`, sans espace.

@@ -10,7 +10,7 @@ const defaultConfig = {
   SITE_URL: "https://maison-max.com",
   SUPABASE_URL: "",
   SUPABASE_ANON_KEY: "",
-  WHATSAPP_NUMBER: "221774957211",
+  WHATSAPP_NUMBER: "221777036107",
   DEFAULT_CITY: "Dakar",
   CURRENCY: "FCFA",
   DELIVERY_ZONES: [
